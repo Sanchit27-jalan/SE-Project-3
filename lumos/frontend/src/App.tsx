@@ -10,353 +10,139 @@ import ProjectInfoPanel from "./components/ProjectInfoPanel";
 import { ProjectController } from "./controllers/ProjectController";
 import { ProjectData, Agent, Tool, Position, Project } from "./models/types";
 import { CanvasObjectFactory } from "./models/CanvasObjectFactory";
-// import { AgentBuilder } from './models/AgentBuilder';
-// import { ToolBuilder } from './models/ToolBuilder';
 import { heartbeat } from "./services/Heartbeat";
 
-function App() {
-  const [projectData, setProjectData] = useState<{
-    project: {
-      id: string;
-      name: string;
-      version: string;
-      description: string;
-      authors: string[];
-    };
-    agents: any[];
-    tools: any[];
-    interactions: any[];
-  }>({
-    project: {
-      id: "new-project",
-      name: "New Project",
-      version: "1.0.0",
-      description: "Create a new project or select an existing one.",
-      authors: [],
-    },
+// Monolithic custom hooks
+function useProjectControllerHook() {
+  const initialState = {
+    project: { id: "new-project", name: "New Project", version: "1.0.0", description: "Create a new project or select an existing one.", authors: [] },
     agents: [],
     tools: [],
-    interactions: [],
-  });
-  const [availableAgents, setAvailableAgents] = useState<Agent[]>([]);
-  const [availableTools, setAvailableTools] = useState<Tool[]>([]);
-  const [projectController, setProjectController] =
-    useState<ProjectController | null>(null);
-  const [isBackendAlive, setIsBackendAlive] = useState(true);
-  const [availableProjects, setAvailableProjects] = useState<
-    { id: string; name: string }[]
-  >([]);
-  const [isLongOperationInProgress, setIsLongOperationInProgress] =
-    useState(false);
+    interactions: []
+  };
+  const [projectData, setProjectData] = useState<ProjectData>(initialState);
+  const [projectController, setProjectController] = useState<ProjectController | null>(null);
+  const [isLongOp, setIsLongOp] = useState(false);
 
-  // Initialize project controller
   useEffect(() => {
-    const controller = new ProjectController((updatedProject: ProjectData) => {
-      setProjectData({
-        project: {
-          id: updatedProject.project.id,
-          name: updatedProject.project.name,
-          version: updatedProject.project.version,
-          description: updatedProject.project.description,
-          authors: updatedProject.project.authors,
-        },
-        agents: updatedProject.agents,
-        tools: updatedProject.tools,
-        interactions: updatedProject.interactions,
-      });
+    const controller = new ProjectController((updated: ProjectData) => {
+      setProjectData({ project: updated.project, agents: updated.agents, tools: updated.tools, interactions: updated.interactions });
     });
-
     setProjectController(controller);
-    setProjectData({
-      project: {
-        id: controller.getProjectData().project.id,
-        name: controller.getProjectData().project.name,
-        version: controller.getProjectData().project.version,
-        description: controller.getProjectData().project.description,
-        authors: controller.getProjectData().project.authors,
-      },
-      agents: controller.getProjectData().agents,
-      tools: controller.getProjectData().tools,
-      interactions: controller.getProjectData().interactions,
-    });
-
-    // Populate some predefined agents and tools for the palette
-    const predefinedAgents = [
-      new Agent(
-        "library-agent-1",
-        "AI",
-        "Chat Assistant",
-        "General purpose chat assistant",
-        "assistant",
-        { llmType: "gpt-4" },
-        ["conversation", "information-retrieval"],
-        { type: "short-term" },
-        { type: "none" },
-      ),
-      new Agent(
-        "library-agent-2",
-        "AI",
-        "Translator",
-        "Language translation specialist",
-        "translator",
-        { llmType: "gpt-4" },
-        ["translation"],
-        { type: "short-term" },
-        { type: "none" },
-      ),
-    ];
-
-    const predefinedTools = [
-      new Tool(
-        "library-tool-1",
-        "Search the web for information",
-        "Information",
-        "Web Search",
-        "",
-        "search",
-        [],
-        {},
-        {},
-      ),
-      new Tool(
-        "library-tool-2",
-        "Convert text between languages",
-        "Interaction",
-        "Language Translator",
-        "",
-        "translator",
-        [],
-        {},
-        {},
-      ),
-    ];
-
-    setAvailableAgents(predefinedAgents);
-    setAvailableTools(predefinedTools);
-    setAvailableProjects([
-      { id: "project1", name: "Project One" },
-      { id: "project2", name: "Project Two" },
-    ]);
+    const init = controller.getProjectData();
+    setProjectData({ project: init.project, agents: init.agents, tools: init.tools, interactions: init.interactions });
   }, []);
+
+  const startLong = () => setIsLongOp(true);
+  const endLong = () => setIsLongOp(false);
+
+  const handleExport = async () => { startLong(); try { if (projectController) return await projectController.exportProject(); return false; } finally { endLong(); } };
+  const handleSave = async () => { if (projectController) return await projectController.saveProject(); return false; };
+  const handleImport = async (ldlData: any) => { startLong(); try { if (projectController) return await projectController.importFromLDL(ldlData); return false; } finally { endLong(); } };
+  const handleDownload = (format: "json" | "yaml") => {
+    if (!projectController) return;
+    const text = projectController.exportAs(format);
+    const mime = format === "json" ? "application/json" : "application/x-yaml";
+    const blob = new Blob([text], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `project.${format}`; a.click(); URL.revokeObjectURL(url);
+  };
+  const handleUpdate = (upd: Project) => { if (projectController) projectController.updateProject(upd); };
+
+  return { projectData, projectController, isLongOp, handleExport, handleSave, handleImport, handleDownload, handleUpdate };
+}
+
+function usePaletteHook() {
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [tools, setTools] = useState<Tool[]>([]);
+  const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
-    // Subscribe to the heartbeat service
-    const handleBackendStatusChange = (isAlive: boolean) => {
-      setIsBackendAlive(isAlive);
-    };
-
-    heartbeat.subscribe(handleBackendStatusChange);
-
-    // Start the heartbeat mechanism
-    heartbeat.startHeartbeat();
-
-    // Cleanup: Unsubscribe when the component unmounts
-    return () => {
-      heartbeat.unsubscribe(handleBackendStatusChange);
-    };
+    setAgents([
+      new Agent("library-agent-1", "AI", "Chat Assistant", "General purpose chat assistant", "assistant", { llmType: "gpt-4" }, ["conversation", "information-retrieval"], { type: "short-term" }, { type: "none" }),
+      new Agent("library-agent-2", "AI", "Translator", "Language translation specialist", "translator", { llmType: "gpt-4" }, ["translation"], { type: "short-term" }, { type: "none" })
+    ]);
+    setTools([
+      new Tool("library-tool-1", "Search the web for information", "Information", "Web Search", "", "search", [], {}, {}),
+      new Tool("library-tool-2", "Convert text between languages", "Interaction", "Language Translator", "", "translator", [], {}, {})
+    ]);
+    setProjects([{ id: "project1", name: "Project One" }, { id: "project2", name: "Project Two" }]);
   }, []);
 
-  const startLongOperation = () => {
-    console.log("Starting long operation, suspending heartbeat...");
-    setIsLongOperationInProgress(true);
-  };
+  const addAgent = (agent: Agent) => setAgents(prev => [...prev, agent]);
+  const addTool = (tool: Tool) => setTools(prev => [...prev, tool]);
+  const editAgent = (id: string, upd: Agent) => setAgents(prev => prev.map(a => a.id === id ? upd : a));
+  const deleteAgent = (id: string) => setAgents(prev => prev.filter(a => a.id !== id));
+  const editTool = (id: string, upd: Tool) => setTools(prev => prev.map(t => t.id === id ? upd : t));
+  const deleteTool = (id: string) => setTools(prev => prev.filter(t => t.id !== id));
 
-  const endLongOperation = () => {
-    console.log("Long operation completed, resuming heartbeat...");
-    setIsLongOperationInProgress(false);
-  };
+  return { agents, tools, projects, addAgent, addTool, editAgent, deleteAgent, editTool, deleteTool };
+}
 
-  // Handle adding an agent to the palette
-  const handleAddAgent = (agent: Agent) => {
-    setAvailableAgents([...availableAgents, agent]);
-  };
+function useHeartbeatStatus() {
+  const [alive, setAlive] = useState(true);
+  useEffect(() => {
+    heartbeat.subscribe(setAlive);
+    heartbeat.startHeartbeat();
+    return () => heartbeat.unsubscribe(setAlive);
+  }, []);
+  return alive;
+}
 
-  // Handle adding a tool to the palette
-  const handleAddTool = (tool: Tool) => {
-    setAvailableTools([...availableTools, tool]);
-  };
-
-  // Handle editing an agent in the palette
-  const handleEditAgent = (agentId: string, updatedAgent: Agent) => {
-    setAvailableAgents(
-      availableAgents.map((agent) =>
-        agent.id === agentId ? updatedAgent : agent,
-      ),
-    );
-  };
-
-  // Handle deleting an agent from the palette
-  const handleDeleteAgent = (agentId: string) => {
-    setAvailableAgents(availableAgents.filter((agent) => agent.id !== agentId));
-  };
-
-  // Handle editing a tool in the palette
-  const handleEditTool = (toolId: string, updatedTool: Tool) => {
-    setAvailableTools(
-      availableTools.map((tool) => (tool.id === toolId ? updatedTool : tool)),
-    );
-  };
-
-  // Handle deleting a tool from the palette
-  const handleDeleteTool = (toolId: string) => {
-    setAvailableTools(availableTools.filter((tool) => tool.id !== toolId));
-  };
-
-  // Handle adding an agent to the canvas
+// Monolithic canvas management hook
+function useCanvasManager(projectController: ProjectController | null, agents: Agent[]) {
   const handleAddAgentToCanvas = (agent: Agent) => {
     if (projectController) {
-      // Use CanvasObjectFactory to create a new agent for the canvas
       const newAgent = CanvasObjectFactory.createAgentForCanvas(agent);
       projectController.addAgent(newAgent);
     }
   };
-
-  // Handle adding a tool to an agent
   const handleAddToolToAgent = (tool: Tool, agentId: string) => {
     if (projectController) {
-      // Use CanvasObjectFactory to create a tool for a specific agent
       const newTool = CanvasObjectFactory.createToolForAgent(tool, agentId);
       projectController.addTool(newTool);
     }
   };
-
-  // Handle connecting nodes on the canvas (creating an interaction)
   const handleConnect = (sourceId: string, targetId: string) => {
-    if (projectController) {
-      projectController.addInteraction(sourceId, targetId);
-    }
+    if (projectController) projectController.addInteraction(sourceId, targetId);
   };
-
-  // Handle node position changes
   const handleNodePositionChange = (nodeId: string, position: Position) => {
-    if (projectController) {
-      projectController.updateNodePosition(nodeId, position);
-    }
+    if (projectController) projectController.updateNodePosition(nodeId, position);
   };
-
-  // Handle deleting an agent
   const handleNodeDelete = (nodeId: string) => {
-    if (projectController) {
-      if (nodeId.startsWith("agent-")) {
-        projectController.removeAgent(nodeId);
-      }
-    }
+    if (projectController && nodeId.startsWith("agent-")) projectController.removeAgent(nodeId);
   };
-
-  // Handle deleting an interaction
   const handleEdgeDelete = (interactionId: string) => {
-    if (projectController) {
-      projectController.removeInteraction(interactionId);
-    }
+    if (projectController) projectController.removeInteraction(interactionId);
   };
-
-  // Handle clearing the canvas
   const handleClearCanvas = () => {
-    if (projectController) {
-      projectController.clearCanvas();
-    }
+    if (projectController) projectController.clearCanvas();
   };
-
-  // Handle agent configuration changes
   const handleAgentConfigChange = (agentId: string, config: any) => {
-    if (projectController && projectData) {
-      const agent = projectData.agents.find((a) => a.id === agentId);
+    if (projectController) {
+      const agent = agents.find(a => a.id === agentId);
       if (agent) {
-        // Update agent configuration
         agent.model = config.model;
         agent.subtype = config.subtype;
-
-        // Notify project controller of changes
-        projectController.updateNodePosition(agentId, agent.position); // This will trigger a state update
+        projectController.updateNodePosition(agentId, agent.position);
       }
     }
   };
+  return { handleAddAgentToCanvas, handleAddToolToAgent, handleConnect, handleNodePositionChange, handleNodeDelete, handleEdgeDelete, handleClearCanvas, handleAgentConfigChange };
+}
 
-  // Handle project export
-  const handleExport = async () => {
-    startLongOperation();
-    try {
-      if (projectController) {
-        return await projectController.exportProject();
-      }
-      return false;
-    } catch (error) {
-      console.error("Export failed:", error);
-      return false;
-    } finally {
-      endLongOperation();
-    }
-  };
+function App() {
+  const { projectData, projectController, handleExport, handleSave, handleImport, handleDownload, handleUpdate } = useProjectControllerHook();
+  const { agents: availableAgents, tools: availableTools, projects: availableProjects, addAgent, addTool, editAgent, deleteAgent, editTool, deleteTool } = usePaletteHook();
+  const isBackendAlive = useHeartbeatStatus();
+  const canvasManager = useCanvasManager(projectController, projectData.agents);
 
-  // Handle project save
-  const handleSave = async () => {
-    if (projectController) {
-      return await projectController.saveProject();
-    }
-    return false;
-  };
-
-  // Handle project import
-  const handleImportProject = async (ldlData: any) => {
-    startLongOperation();
-    try {
-      if (projectController) {
-        return await projectController.importFromLDL(ldlData);
-      }
-      return false;
-    } catch (error) {
-      console.error("Import failed:", error);
-      return false;
-    } finally {
-      endLongOperation();
-    }
-  };
-
-  // Handle project download in JSON or YAML
-  const handleDownload = (format: "json" | "yaml") => {
-    if (projectController) {
-      const text = projectController.exportAs(format);
-      const mime =
-        format === "json" ? "application/json" : "application/x-yaml";
-      const blob = new Blob([text], { type: mime });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `project.${format}`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  };
-
-  // Handle project metadata update
-  const handleProjectUpdate = (updatedProject: Project) => {
-    if (projectController) {
-      projectController.updateProject(updatedProject);
-    }
-  };
-
-  // Handle project selection
   const handleSelectProject = (project: { id: string; name: string }) => {
     console.log(`Selected project: ${project.name} (${project.id})`);
-
-    // In a real implementation, you would fetch the project data from the API
-    // For now, create a new project with the selected name
-    if (projectController) {
-      const updatedProject = {
-        ...projectData.project,
-        id: project.id,
-        name: project.name,
-      };
-      projectController.updateProject(updatedProject);
-
-      // Clear existing canvas (in a real app, you'd load the actual project data)
-      setProjectData({
-        project: updatedProject,
-        agents: [],
-        tools: [],
-        interactions: [],
-      });
-    }
+    const updatedProject = { ...projectData.project, id: project.id, name: project.name };
+    handleUpdate(updatedProject);
+    // clear canvas after selecting a new project
+    canvasManager.handleClearCanvas();
   };
 
   return (
@@ -402,7 +188,6 @@ function App() {
               overflow: "hidden",
             }}
           >
-            {/* Main Content Area - takes full width and remaining height */}
             <Box
               sx={{
                 display: "flex",
@@ -412,15 +197,14 @@ function App() {
                 overflow: "hidden",
               }}
             >
-              {/* Left Sidebar - resizable panel */}
               <Box
                 sx={{
                   width: "auto",
                   minWidth: 200,
                   maxWidth: 600,
                   height: "100%",
-                  resize: "horizontal", // allow user to drag width
-                  overflow: "hidden", // hide native scrollbars
+                  resize: "horizontal",
+                  overflow: "hidden",
                   borderRight: "1px solid rgba(255, 255, 255, 0.12)",
                   boxSizing: "border-box",
                   padding: 0,
@@ -432,25 +216,23 @@ function App() {
                   tools={availableTools}
                   availableProjects={availableProjects}
                   onSelectProject={handleSelectProject}
-                  onAddAgent={handleAddAgent}
-                  onAddTool={handleAddTool}
-                  onAddAgentToCanvas={handleAddAgentToCanvas}
+                  onAddAgent={addAgent}
+                  onAddTool={addTool}
+                  onAddAgentToCanvas={canvasManager.handleAddAgentToCanvas}
                   onAddToolToCanvas={(tool: Tool) => {
                     if (tool.agentId) {
-                      handleAddToolToAgent(tool, tool.agentId);
+                      canvasManager.handleAddToolToAgent(tool, tool.agentId);
                     }
                   }}
-                  onEditAgent={handleEditAgent}
-                  onDeleteAgent={handleDeleteAgent}
-                  onEditTool={handleEditTool}
-                  onDeleteTool={handleDeleteTool}
+                  onEditAgent={editAgent}
+                  onDeleteAgent={deleteAgent}
+                  onEditTool={editTool}
+                  onDeleteTool={deleteTool}
                   canvasAgents={projectData.agents}
-                  onImportProject={handleImportProject}
+                  onImportProject={handleImport}
                   sx={{ width: "100%" }}
                 />
               </Box>
-
-              {/* Canvas Area - exactly 80% of screen width */}
               <Box
                 sx={{
                   width: "80%",
@@ -462,7 +244,6 @@ function App() {
                   flexDirection: "column",
                 }}
               >
-                {/* Project Info Panel */}
                 <Box
                   sx={{
                     position: "relative",
@@ -471,11 +252,9 @@ function App() {
                 >
                   <ProjectInfoPanel
                     project={projectData.project}
-                    onUpdate={handleProjectUpdate}
+                    onUpdate={handleUpdate}
                   />
                 </Box>
-
-                {/* Canvas */}
                 <Box
                   sx={{
                     flexGrow: 1,
@@ -487,11 +266,11 @@ function App() {
                       agents={projectData.agents}
                       tools={projectData.tools}
                       interactions={projectData.interactions}
-                      onConnect={handleConnect}
-                      onNodePositionChange={handleNodePositionChange}
-                      onNodeDelete={handleNodeDelete}
-                      onAgentConfigChange={handleAgentConfigChange}
-                      onEdgeDelete={handleEdgeDelete}
+                      onConnect={canvasManager.handleConnect}
+                      onNodePositionChange={canvasManager.handleNodePositionChange}
+                      onNodeDelete={canvasManager.handleNodeDelete}
+                      onAgentConfigChange={canvasManager.handleAgentConfigChange}
+                      onEdgeDelete={canvasManager.handleEdgeDelete}
                     />
                     <Box
                       sx={{
@@ -507,7 +286,7 @@ function App() {
                             variant="outlined"
                             color="secondary"
                             startIcon={<DeleteSweepIcon />}
-                            onClick={handleClearCanvas}
+                            onClick={canvasManager.handleClearCanvas}
                           >
                             Clear Canvas
                           </Button>

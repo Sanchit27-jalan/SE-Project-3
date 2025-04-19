@@ -204,7 +204,13 @@ Key test files:
 
 To run all tests:
 ```bash
+cd lumos/backend
 python -m unittest discover -v tests
+```
+OR simply:
+```bash
+cd lumos/backend/tests
+pytest 
 ```
 
 ### Frontend Tests
