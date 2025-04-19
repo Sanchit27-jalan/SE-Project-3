@@ -1,0 +1,31 @@
+{
+  "agent": {
+    "name": "Email Reader",
+    "description": "An intelligent agent designed to read, analyze, and manage emails efficiently. It can categorize emails, extract key information, and provide summaries to help users prioritize their inbox. Additionally, it can identify and filter spam, schedule emails for follow-up, and integrate with calendar applications.",
+    "type": "AI",
+    "subtype": "NLP",
+    "capabilities": [
+      "emailReading",
+      "informationExtraction",
+      "emailCategorization",
+      "spamDetection",
+      "emailSummarization",
+      "followUpScheduling",
+      "calendarIntegration"
+    ],
+    "memory": {
+      "type": "Vector",
+      "capacity": "2GB",
+      "persistence": true,
+      "storage": "Cloud"
+    },
+    "suggested_tools": {
+      "SpamFilter": "Detects and filters out spam emails to keep the inbox clean.",
+      "KeywordExtractor": "Extracts important keywords and phrases from emails to highlight key information.",
+      "EmailSummarizer": "Provides concise summaries of lengthy emails to save time.",
+      "PrioritySorter": "Sorts emails based on priority levels to help users focus on important messages first.",
+      "FollowUpScheduler": "Schedules follow-up reminders for emails that require a response or action.",
+      "CalendarSync": "Integrates with calendar applications to automatically add events or meetings mentioned in emails."
+    }
+  }
+}

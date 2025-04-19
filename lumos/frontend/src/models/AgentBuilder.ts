@@ -1,4 +1,4 @@
-import { Agent, Position } from "./types";
+import { Agent, Position } from './types';
 
 /**
  * Builder pattern implementation for creating Agent objects
@@ -7,13 +7,13 @@ import { Agent, Position } from "./types";
 export class AgentBuilder {
   private id: string;
   private type: string;
-  private name: string = "";
-  private description: string = "";
-  private subtype: string = "";
+  private name: string = '';
+  private description: string = '';
+  private subtype: string = '';
   private model: Record<string, any> = {};
   private capabilities: string[] = [];
-  private memory: Record<string, any> = { type: "short-term" };
-  private learning: Record<string, any> = { type: "none" };
+  private memory: Record<string, any> = { type: 'short-term' };
+  private learning: Record<string, any> = { type: 'none' };
   private position: Position = { x: 0, y: 0 };
 
   /**
@@ -27,7 +27,7 @@ export class AgentBuilder {
   /**
    * Creates a new builder instance with a timestamp-based ID
    */
-  static create(type: string = "AI"): AgentBuilder {
+  static create(type: string = 'AI'): AgentBuilder {
     return new AgentBuilder(`agent-${Date.now()}`, type);
   }
 
@@ -80,17 +80,12 @@ export class AgentBuilder {
   }
 
   removeCapability(capabilityOrIndex: string | number): AgentBuilder {
-    if (typeof capabilityOrIndex === "number") {
-      if (
-        capabilityOrIndex >= 0 &&
-        capabilityOrIndex < this.capabilities.length
-      ) {
+    if (typeof capabilityOrIndex === 'number') {
+      if (capabilityOrIndex >= 0 && capabilityOrIndex < this.capabilities.length) {
         this.capabilities.splice(capabilityOrIndex, 1);
       }
     } else {
-      this.capabilities = this.capabilities.filter(
-        (cap) => cap !== capabilityOrIndex,
-      );
+      this.capabilities = this.capabilities.filter(cap => cap !== capabilityOrIndex);
     }
     return this;
   }
@@ -137,7 +132,7 @@ export class AgentBuilder {
       this.capabilities,
       this.memory,
       this.learning,
-      this.position,
+      this.position
     );
   }
 }

@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import { Box, CssBaseline, ThemeProvider, Typography, Button, Tooltip, Stack } from "@mui/material";
+import { useState, useEffect } from 'react';
+import { Box, CssBaseline, ThemeProvider, Typography, Button, Tooltip, Stack } from '@mui/material';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
-import { ReactFlowProvider } from "reactflow";
-import theme from "./theme.ts";
-import Canvas from "./components/Canvas";
-import ElementPalette from "./components/ElementPalette";
-import ExportButton from "./components/ExportButton";
-import ProjectInfoPanel from "./components/ProjectInfoPanel";
-import { ProjectController } from "./controllers/ProjectController";
-import { ProjectData, Agent, Tool, Position, Project } from "./models/types";
-import { CanvasObjectFactory } from "./models/CanvasObjectFactory";
+import { ReactFlowProvider } from 'reactflow';
+import theme from './theme.ts';
+import Canvas from './components/Canvas';
+import ElementPalette from './components/ElementPalette';
+import ExportButton from './components/ExportButton';
+import ProjectInfoPanel from './components/ProjectInfoPanel';
+import { ProjectController } from './controllers/ProjectController';
+import { ProjectData, Agent, Tool, Position, Project } from './models/types';
+import { CanvasObjectFactory } from './models/CanvasObjectFactory';
 // import { AgentBuilder } from './models/AgentBuilder';
 // import { ToolBuilder } from './models/ToolBuilder';
-import { heartbeat } from "./services/Heartbeat";
+import { heartbeat } from './services/Heartbeat';
 
 function App() {
   const [projectData, setProjectData] = useState<{
@@ -28,10 +28,10 @@ function App() {
     interactions: any[];
   }>({
     project: {
-      id: "new-project",
-      name: "New Project",
-      version: "1.0.0",
-      description: "Create a new project or select an existing one.",
+      id: 'new-project',
+      name: 'New Project',
+      version: '1.0.0',
+      description: 'Create a new project or select an existing one.',
       authors: [],
     },
     agents: [],
@@ -40,14 +40,10 @@ function App() {
   });
   const [availableAgents, setAvailableAgents] = useState<Agent[]>([]);
   const [availableTools, setAvailableTools] = useState<Tool[]>([]);
-  const [projectController, setProjectController] =
-    useState<ProjectController | null>(null);
+  const [projectController, setProjectController] = useState<ProjectController | null>(null);
   const [isBackendAlive, setIsBackendAlive] = useState(true);
-  const [availableProjects, setAvailableProjects] = useState<
-    { id: string; name: string }[]
-  >([]);
-  const [isLongOperationInProgress, setIsLongOperationInProgress] =
-    useState(false);
+  const [availableProjects, setAvailableProjects] = useState<{ id: string; name: string }[]>([]);
+  const [isLongOperationInProgress, setIsLongOperationInProgress] = useState(false);
 
   // Initialize project controller
   useEffect(() => {
@@ -83,59 +79,59 @@ function App() {
     // Populate some predefined agents and tools for the palette
     const predefinedAgents = [
       new Agent(
-        "library-agent-1",
-        "AI",
-        "Chat Assistant",
-        "General purpose chat assistant",
-        "assistant",
-        { llmType: "gpt-4" },
-        ["conversation", "information-retrieval"],
-        { type: "short-term" },
-        { type: "none" },
+        'library-agent-1',
+        'AI',
+        'Chat Assistant',
+        'General purpose chat assistant',
+        'assistant',
+        { llmType: 'gpt-4' },
+        ['conversation', 'information-retrieval'],
+        { type: 'short-term' },
+        { type: 'none' }
       ),
       new Agent(
-        "library-agent-2",
-        "AI",
-        "Translator",
-        "Language translation specialist",
-        "translator",
-        { llmType: "gpt-4" },
-        ["translation"],
-        { type: "short-term" },
-        { type: "none" },
+        'library-agent-2',
+        'AI',
+        'Translator',
+        'Language translation specialist',
+        'translator',
+        { llmType: 'gpt-4' },
+        ['translation'],
+        { type: 'short-term' },
+        { type: 'none' }
       ),
     ];
 
     const predefinedTools = [
       new Tool(
-        "library-tool-1",
-        "Search the web for information",
-        "Information",
-        "Web Search",
-        "",
-        "search",
+        'library-tool-1',
+        'Search the web for information',
+        'Information',
+        'Web Search',
+        '',
+        'search',
         [],
         {},
-        {},
+        {}
       ),
       new Tool(
-        "library-tool-2",
-        "Convert text between languages",
-        "Interaction",
-        "Language Translator",
-        "",
-        "translator",
+        'library-tool-2',
+        'Convert text between languages',
+        'Interaction',
+        'Language Translator',
+        '',
+        'translator',
         [],
         {},
-        {},
+        {}
       ),
     ];
 
     setAvailableAgents(predefinedAgents);
     setAvailableTools(predefinedTools);
     setAvailableProjects([
-      { id: "project1", name: "Project One" },
-      { id: "project2", name: "Project Two" },
+      { id: 'project1', name: 'Project One' },
+      { id: 'project2', name: 'Project Two' },
     ]);
   }, []);
 
@@ -157,12 +153,12 @@ function App() {
   }, []);
 
   const startLongOperation = () => {
-    console.log("Starting long operation, suspending heartbeat...");
+    console.log('Starting long operation, suspending heartbeat...');
     setIsLongOperationInProgress(true);
   };
 
   const endLongOperation = () => {
-    console.log("Long operation completed, resuming heartbeat...");
+    console.log('Long operation completed, resuming heartbeat...');
     setIsLongOperationInProgress(false);
   };
 
@@ -178,28 +174,22 @@ function App() {
 
   // Handle editing an agent in the palette
   const handleEditAgent = (agentId: string, updatedAgent: Agent) => {
-    setAvailableAgents(
-      availableAgents.map((agent) =>
-        agent.id === agentId ? updatedAgent : agent,
-      ),
-    );
+    setAvailableAgents(availableAgents.map(agent => (agent.id === agentId ? updatedAgent : agent)));
   };
 
   // Handle deleting an agent from the palette
   const handleDeleteAgent = (agentId: string) => {
-    setAvailableAgents(availableAgents.filter((agent) => agent.id !== agentId));
+    setAvailableAgents(availableAgents.filter(agent => agent.id !== agentId));
   };
 
   // Handle editing a tool in the palette
   const handleEditTool = (toolId: string, updatedTool: Tool) => {
-    setAvailableTools(
-      availableTools.map((tool) => (tool.id === toolId ? updatedTool : tool)),
-    );
+    setAvailableTools(availableTools.map(tool => (tool.id === toolId ? updatedTool : tool)));
   };
 
   // Handle deleting a tool from the palette
   const handleDeleteTool = (toolId: string) => {
-    setAvailableTools(availableTools.filter((tool) => tool.id !== toolId));
+    setAvailableTools(availableTools.filter(tool => tool.id !== toolId));
   };
 
   // Handle adding an agent to the canvas
@@ -237,7 +227,7 @@ function App() {
   // Handle deleting an agent
   const handleNodeDelete = (nodeId: string) => {
     if (projectController) {
-      if (nodeId.startsWith("agent-")) {
+      if (nodeId.startsWith('agent-')) {
         projectController.removeAgent(nodeId);
       }
     }
@@ -260,7 +250,7 @@ function App() {
   // Handle agent configuration changes
   const handleAgentConfigChange = (agentId: string, config: any) => {
     if (projectController && projectData) {
-      const agent = projectData.agents.find((a) => a.id === agentId);
+      const agent = projectData.agents.find(a => a.id === agentId);
       if (agent) {
         // Update agent configuration
         agent.model = config.model;
@@ -281,7 +271,7 @@ function App() {
       }
       return false;
     } catch (error) {
-      console.error("Export failed:", error);
+      console.error('Export failed:', error);
       return false;
     } finally {
       endLongOperation();
@@ -305,7 +295,7 @@ function App() {
       }
       return false;
     } catch (error) {
-      console.error("Import failed:", error);
+      console.error('Import failed:', error);
       return false;
     } finally {
       endLongOperation();
@@ -313,14 +303,13 @@ function App() {
   };
 
   // Handle project download in JSON or YAML
-  const handleDownload = (format: "json" | "yaml") => {
+  const handleDownload = (format: 'json' | 'yaml') => {
     if (projectController) {
       const text = projectController.exportAs(format);
-      const mime =
-        format === "json" ? "application/json" : "application/x-yaml";
+      const mime = format === 'json' ? 'application/json' : 'application/x-yaml';
       const blob = new Blob([text], { type: mime });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
       a.download = `project.${format}`;
       a.click();
@@ -336,26 +325,46 @@ function App() {
   };
 
   // Handle project selection
-  const handleSelectProject = (project: { id: string; name: string }) => {
-    console.log(`Selected project: ${project.name} (${project.id})`);
-
-    // In a real implementation, you would fetch the project data from the API
-    // For now, create a new project with the selected name
+  const handleSelectProject = async (project: { id: string | number; name: string; /* other fields */ }) => {
+    console.log(`Selected project: ${project.name} (ID: ${project.id})`);
+  
+    // Ensure ID is a number
+    const projectId = typeof project.id === 'string' ? parseInt(project.id, 10) : project.id;
+  
     if (projectController) {
-      const updatedProject = {
-        ...projectData.project,
-        id: project.id,
-        name: project.name,
-      };
-      projectController.updateProject(updatedProject);
-
-      // Clear existing canvas (in a real app, you'd load the actual project data)
-      setProjectData({
-        project: updatedProject,
-        agents: [],
-        tools: [],
-        interactions: [],
-      });
+      startLongOperation();
+      try {
+        // Add detailed logging before loading
+        console.log("Attempting to load project with ID:", projectId);
+        
+        // Load the project data from the API
+        const success = await projectController.loadProjectById(projectId);
+        
+        if (success) {
+          console.log("Project loaded successfully");
+          
+          // Print the full project data after loading
+          const loadedData = projectController.getProjectData();
+          console.log("Loaded project data:", {
+            project: loadedData.project,
+            agents: loadedData.agents,
+            tools: loadedData.tools,
+            interactions: loadedData.interactions
+          });
+          
+          // Check specific agent properties to find the issue
+          if (loadedData.agents.length > 0) {
+            console.log("First agent ID:", loadedData.agents[0].id);
+            console.log("First agent ID type:", typeof loadedData.agents[0].id);
+          }
+        } else {
+          console.error("Failed to load project");
+        }
+      } catch (error) {
+        console.error("Error loading project:", error);
+      } finally {
+        endLongOperation();
+      }
     }
   };
 
@@ -364,65 +373,63 @@ function App() {
       <CssBaseline />
       <Box
         sx={{
-          position: "relative",
-          height: "100vh",
-          width: "100vw",
-          overflow: "hidden",
+          position: 'relative',
+          height: '100vh',
+          width: '100vw',
+          overflow: 'hidden',
         }}
       >
         {!isBackendAlive && (
           <Box
             sx={{
-              position: "absolute",
+              position: 'absolute',
               top: 0,
               left: 0,
-              width: "100%",
-              height: "100%",
-              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
               zIndex: 9999,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontSize: "1.5rem",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '1.5rem',
             }}
           >
-            <Typography variant="h5">
-              Connection to server lost. Reconnecting...
-            </Typography>
+            <Typography variant="h5">Connection to server lost. Reconnecting...</Typography>
           </Box>
         )}
-        <Box sx={{ pointerEvents: isBackendAlive ? "auto" : "none" }}>
+        <Box sx={{ pointerEvents: isBackendAlive ? 'auto' : 'none' }}>
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              height: "100vh",
-              width: "100vw",
-              overflow: "hidden",
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100vh',
+              width: '100vw',
+              overflow: 'hidden',
             }}
           >
             {/* Main Content Area - takes full width and remaining height */}
             <Box
               sx={{
-                display: "flex",
-                flexDirection: "row",
+                display: 'flex',
+                flexDirection: 'row',
                 flexGrow: 1,
-                width: "100%",
-                overflow: "hidden",
+                width: '100%',
+                overflow: 'hidden',
               }}
             >
               {/* Left Sidebar - resizable panel */}
               <Box
                 sx={{
-                  width: "auto",
+                  width: 'auto',
                   minWidth: 200,
                   maxWidth: 600,
-                  height: "100%",
-                  resize: "horizontal", // allow user to drag width
-                  overflow: "hidden", // hide native scrollbars
-                  borderRight: "1px solid rgba(255, 255, 255, 0.12)",
-                  boxSizing: "border-box",
+                  height: '100%',
+                  resize: 'horizontal', // allow user to drag width
+                  overflow: 'hidden', // hide native scrollbars
+                  borderRight: '1px solid rgba(255, 255, 255, 0.12)',
+                  boxSizing: 'border-box',
                   padding: 0,
                   margin: 0,
                 }}
@@ -446,26 +453,26 @@ function App() {
                   onDeleteTool={handleDeleteTool}
                   canvasAgents={projectData.agents}
                   onImportProject={handleImportProject}
-                  sx={{ width: "100%" }}
+                  sx={{ width: '100%' }}
                 />
               </Box>
 
               {/* Canvas Area - exactly 80% of screen width */}
               <Box
                 sx={{
-                  width: "80%",
-                  height: "100%",
-                  position: "relative",
+                  width: '80%',
+                  height: '100%',
+                  position: 'relative',
                   padding: 0,
                   margin: 0,
-                  display: "flex",
-                  flexDirection: "column",
+                  display: 'flex',
+                  flexDirection: 'column',
                 }}
               >
                 {/* Project Info Panel */}
                 <Box
                   sx={{
-                    position: "relative",
+                    position: 'relative',
                     zIndex: 10,
                   }}
                 >
@@ -479,7 +486,7 @@ function App() {
                 <Box
                   sx={{
                     flexGrow: 1,
-                    position: "relative",
+                    position: 'relative',
                   }}
                 >
                   <ReactFlowProvider>
@@ -495,7 +502,7 @@ function App() {
                     />
                     <Box
                       sx={{
-                        position: "absolute",
+                        position: 'absolute',
                         right: 30,
                         bottom: 30,
                         zIndex: 1000,

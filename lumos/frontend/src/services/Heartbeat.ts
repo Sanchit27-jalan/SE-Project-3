@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "./apiService"; // Import the backend URL
+import { API_BASE_URL } from './apiService'; // Import the backend URL
 
 type Observer = (isAlive: boolean) => void;
 
@@ -16,12 +16,12 @@ class Heartbeat {
 
   // Unsubscribe an observer
   unsubscribe(observer: Observer) {
-    this.observers = this.observers.filter((obs) => obs !== observer);
+    this.observers = this.observers.filter(obs => obs !== observer);
   }
 
   // Notify all observers of a status change
   private notify() {
-    this.observers.forEach((observer) => observer(this.isAlive));
+    this.observers.forEach(observer => observer(this.isAlive));
   }
 
   // Start the heartbeat mechanism
@@ -48,17 +48,15 @@ class Heartbeat {
         const alive = response.ok;
         if (this.isAlive !== alive) {
           this.isAlive = alive;
-          console.log(
-            `Backend status changed: ${this.isAlive ? "Online" : "Offline"}`,
-          );
+          console.log(`Backend status changed: ${this.isAlive ? 'Online' : 'Offline'}`);
           this.notify(); // Notify observers of the status change
         }
       } catch (error) {
         clearTimeout(timeoutId); // Clear the timeout if an error occurs
-        console.error("Error during heartbeat request:", error);
+        console.error('Error during heartbeat request:', error);
         if (this.isAlive) {
           this.isAlive = false;
-          console.log("Backend status changed: Offline");
+          console.log('Backend status changed: Offline');
           this.notify(); // Notify observers that the backend is down
         }
       }
@@ -67,13 +65,13 @@ class Heartbeat {
 
   // Pause the heartbeat mechanism
   pauseHeartbeat() {
-    console.log("Pausing heartbeat...");
+    console.log('Pausing heartbeat...');
     this.isPaused = true;
   }
 
   // Resume the heartbeat mechanism
   resumeHeartbeat() {
-    console.log("Resuming heartbeat...");
+    console.log('Resuming heartbeat...');
     this.isPaused = false;
   }
 }

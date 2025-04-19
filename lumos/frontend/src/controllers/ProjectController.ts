@@ -1,14 +1,7 @@
-import {
-  Project,
-  ProjectData,
-  Agent,
-  Tool,
-  Interaction,
-  Position,
-} from "../models/types";
-import { ApiService } from "../services/apiService";
-import { serializeLdl, deserializeLdl } from "../services/apiService";
-import { CanvasObjectFactory } from "../models/CanvasObjectFactory";
+import { Project, ProjectData, Agent, Tool, Interaction, Position } from '../models/types';
+import { ApiService } from '../services/apiService';
+import { serializeLdl, deserializeLdl } from '../services/apiService';
+import { CanvasObjectFactory } from '../models/CanvasObjectFactory';
 
 /**
  * Controller for managing project data and operations
@@ -20,13 +13,34 @@ export class ProjectController {
   constructor(onProjectChanged: (project: ProjectData) => void) {
     // Initialize with default project
     this.projectData = new ProjectData(
-      new Project("New Project", "1.0.0", "A new agent orchestration project"),
+      new Project('New Project', '1.0.0', 'A new agent orchestration project')
     );
 
     // Add default input/output nodes
     this.addDefaultNodes();
 
     this.onProjectChanged = onProjectChanged;
+  }
+
+  /**
+   * Create a brand‑new project with only the default system nodes
+   */
+  public newProject(): void {
+    // 1) Re‑initialize projectData
+    this.projectData = new ProjectData(
+      new Project("New Project", "1.0.0", "A new agent orchestration project")
+    );
+
+    // 2) Clear collections
+    this.projectData.agents = [];
+    this.projectData.tools = [];
+    this.projectData.interactions = [];
+
+    // 3) Re‑add the default input/output nodes
+    this.addDefaultNodes();
+
+    // 4) Notify the UI
+    this.notifyChange();
   }
 
   /**
@@ -96,23 +110,20 @@ export class ProjectController {
     const target = this.findNodeById(targetId);
 
     if (!source || !target) {
-      console.error(
-        "Cannot create interaction: Source or target node not found",
-      );
+      console.error('Cannot create interaction: Source or target node not found');
       return;
     }
 
     // Check if the target is a user output node - enforce single input
-    if (target.id === "user-output") {
+    if (target.id === 'user-output') {
       // Check if user-output already has an incoming connection
       const hasExistingConnection = this.projectData.interactions.some(
-        (interaction) =>
-          interaction.participants.length >= 2 &&
-          interaction.participants[1] === "user-output",
+        interaction =>
+          interaction.participants.length >= 2 && interaction.participants[1] === 'user-output'
       );
 
       if (hasExistingConnection) {
-        console.error("User Output node can only have a single input");
+        console.error('User Output node can only have a single input');
         return;
       }
     }
@@ -122,11 +133,11 @@ export class ProjectController {
 
     // Check if interaction already exists
     const existingInteraction = this.projectData.interactions.find(
-      (interaction) => interaction.id === interactionId,
+      interaction => interaction.id === interactionId
     );
 
     if (existingInteraction) {
-      console.log("Interaction already exists");
+      console.log('Interaction already exists');
       return;
     }
 
@@ -134,9 +145,9 @@ export class ProjectController {
       interactionId,
       `Connection ${sourceId}-${targetId}`,
       `Connection between ${sourceId} and ${targetId}`,
-      "AgentAgent",
+      'AgentAgent',
       [sourceId, targetId],
-      { type: "DirectedMessaging", messageTypes: ["task"] },
+      { type: 'DirectedMessaging', messageTypes: ['task'] }
     );
 
     this.projectData.interactions.push(interaction);
@@ -148,25 +159,21 @@ export class ProjectController {
    */
   removeAgent(agentId: string): void {
     // Don't remove system agents (user input/output)
-    if (agentId === "user-input" || agentId === "user-output") {
-      console.warn("Cannot remove system agents");
+    if (agentId === 'user-input' || agentId === 'user-output') {
+      console.warn('Cannot remove system agents');
       return;
     }
 
     // Remove the agent
-    this.projectData.agents = this.projectData.agents.filter(
-      (agent) => agent.id !== agentId,
-    );
+    this.projectData.agents = this.projectData.agents.filter(agent => agent.id !== agentId);
 
     // Remove associated interactions
     this.projectData.interactions = this.projectData.interactions.filter(
-      (interaction) => !interaction.participants.includes(agentId),
+      interaction => !interaction.participants.includes(agentId)
     );
 
     // Remove associated tools or update them
-    this.projectData.tools = this.projectData.tools.filter(
-      (tool) => tool.agentId !== agentId,
-    );
+    this.projectData.tools = this.projectData.tools.filter(tool => tool.agentId !== agentId);
 
     this.notifyChange();
   }
@@ -175,9 +182,7 @@ export class ProjectController {
    * Remove a tool from the project
    */
   removeTool(toolId: string): void {
-    this.projectData.tools = this.projectData.tools.filter(
-      (tool) => tool.id !== toolId,
-    );
+    this.projectData.tools = this.projectData.tools.filter(tool => tool.id !== toolId);
     this.notifyChange();
   }
 
@@ -186,7 +191,7 @@ export class ProjectController {
    */
   removeInteraction(interactionId: string): void {
     this.projectData.interactions = this.projectData.interactions.filter(
-      (interaction) => interaction.id !== interactionId,
+      interaction => interaction.id !== interactionId
     );
     this.notifyChange();
   }
@@ -196,11 +201,32 @@ export class ProjectController {
    */
   updateNodePosition(nodeId: string, position: Position): void {
     // Try to find the node in agents
-    const agent = this.projectData.agents.find((a) => a.id === nodeId);
+    const agent = this.projectData.agents.find(a => a.id === nodeId);
     if (agent) {
-      agent.position = position;
+      console.log(`Updating node position for ${nodeId}:`, {
+        from: agent.position,
+        to: position,
+        isSystemNode: nodeId === "user-input" || nodeId === "user-output"
+      });
+      
+      // Create a deep clone to ensure position object is completely new
+      agent.position = { 
+        x: position.x, 
+        y: position.y 
+      };
+      
+      // IMPORTANT: Always mark as user-positioned
+      agent.userPositioned = true;
+      agent.manuallyPositioned = true;
+      
+      // Force a deeper state change by creating a new agents array
+      this.projectData.agents = [...this.projectData.agents];
+      
+      // Notify that project data changed to trigger UI updates
       this.notifyChange();
       return;
+    } else {
+      console.warn(`Could not find node with ID ${nodeId} to update position`);
     }
   }
 
@@ -208,7 +234,7 @@ export class ProjectController {
    * Associate a tool with an agent
    */
   assignToolToAgent(toolId: string, agentId: string): void {
-    const tool = this.projectData.tools.find((t) => t.id === toolId);
+    const tool = this.projectData.tools.find(t => t.id === toolId);
     if (tool) {
       tool.agentId = agentId;
       this.notifyChange();
@@ -219,7 +245,7 @@ export class ProjectController {
    * Find an agent by its ID
    */
   private findNodeById(nodeId: string): Agent | undefined {
-    return this.projectData.agents.find((a) => a.id === nodeId);
+    return this.projectData.agents.find(a => a.id === nodeId);
   }
 
   /**
@@ -237,54 +263,41 @@ export class ProjectController {
     const warnings: string[] = [];
 
     // Check for user input and output nodes
-    const hasInputNode = this.projectData.agents.some(
-      (a) => a.id === "user-input",
-    );
-    const hasOutputNode = this.projectData.agents.some(
-      (a) => a.id === "user-output",
-    );
+    const hasInputNode = this.projectData.agents.some(a => a.id === 'user-input');
+    const hasOutputNode = this.projectData.agents.some(a => a.id === 'user-output');
 
     if (!hasInputNode) {
-      errors.push(
-        "Project must have a User Input node to receive user requests",
-      );
+      errors.push('Project must have a User Input node to receive user requests');
     }
 
     if (!hasOutputNode) {
-      errors.push(
-        "Project must have a User Output node to display responses to the user",
-      );
+      errors.push('Project must have a User Output node to display responses to the user');
     }
 
     // Check if user output has exactly one input
     if (hasOutputNode) {
       const outputNodeInputs = this.projectData.interactions.filter(
-        (interaction) =>
-          interaction.participants.length >= 2 &&
-          interaction.participants[1] === "user-output",
+        interaction =>
+          interaction.participants.length >= 2 && interaction.participants[1] === 'user-output'
       );
 
       if (outputNodeInputs.length === 0) {
         errors.push(
-          "User Output node must have at least one input connection. Add a connection from an agent to the User Output node.",
+          'User Output node must have at least one input connection. Add a connection from an agent to the User Output node.'
         );
       } else if (outputNodeInputs.length > 1) {
         errors.push(
-          `User Output node has ${outputNodeInputs.length} input connections, but must have exactly one. Remove additional connections to ensure a clean response format.`,
+          `User Output node has ${outputNodeInputs.length} input connections, but must have exactly one. Remove additional connections to ensure a clean response format.`
         );
       }
     }
 
     // Check if there's a path from user input to user output
     if (hasInputNode && hasOutputNode) {
-      const pathExists = this.checkPathExists(
-        "user-input",
-        "user-output",
-        new Set(),
-      );
+      const pathExists = this.checkPathExists('user-input', 'user-output', new Set());
       if (!pathExists) {
         errors.push(
-          "There must be a path from User Input to User Output. Create a series of connections to establish this flow.",
+          'There must be a path from User Input to User Output. Create a series of connections to establish this flow.'
         );
       }
     }
@@ -292,7 +305,7 @@ export class ProjectController {
     // Check for orphaned nodes (agents without any connections)
     const connectedNodeIds = new Set<string>();
 
-    this.projectData.interactions.forEach((interaction) => {
+    this.projectData.interactions.forEach(interaction => {
       if (interaction.participants.length >= 2) {
         connectedNodeIds.add(interaction.participants[0]);
         connectedNodeIds.add(interaction.participants[1]);
@@ -300,40 +313,34 @@ export class ProjectController {
     });
 
     const orphanedAgents = this.projectData.agents.filter(
-      (agent) =>
-        !connectedNodeIds.has(agent.id) &&
-        agent.id !== "user-input" &&
-        agent.id !== "user-output",
+      agent =>
+        !connectedNodeIds.has(agent.id) && agent.id !== 'user-input' && agent.id !== 'user-output'
     );
 
     if (orphanedAgents.length > 0) {
-      const orphanedNames = orphanedAgents.map((a) => `"${a.name}"`).join(", ");
+      const orphanedNames = orphanedAgents.map(a => `"${a.name}"`).join(', ');
       warnings.push(
-        `Found ${orphanedAgents.length} orphaned agent(s): ${orphanedNames}. These agents have no connections and won't be utilized.`,
+        `Found ${orphanedAgents.length} orphaned agent(s): ${orphanedNames}. These agents have no connections and won't be utilized.`
       );
     }
 
     // Check for agents with only input connections but no output
     const agentsWithOnlyInputs = this.projectData.agents
-      .filter(
-        (agent) => agent.id !== "user-output" && agent.id !== "user-input",
-      )
-      .filter((agent) => {
+      .filter(agent => agent.id !== 'user-output' && agent.id !== 'user-input')
+      .filter(agent => {
         const hasInputs = this.projectData.interactions.some(
-          (interaction) => interaction.participants[1] === agent.id,
+          interaction => interaction.participants[1] === agent.id
         );
         const hasOutputs = this.projectData.interactions.some(
-          (interaction) => interaction.participants[0] === agent.id,
+          interaction => interaction.participants[0] === agent.id
         );
         return hasInputs && !hasOutputs;
       });
 
     if (agentsWithOnlyInputs.length > 0) {
-      const deadEndNames = agentsWithOnlyInputs
-        .map((a) => `"${a.name}"`)
-        .join(", ");
+      const deadEndNames = agentsWithOnlyInputs.map(a => `"${a.name}"`).join(', ');
       warnings.push(
-        `Found ${agentsWithOnlyInputs.length} agent(s) that receive input but don't send output: ${deadEndNames}. This creates dead ends in your workflow.`,
+        `Found ${agentsWithOnlyInputs.length} agent(s) that receive input but don't send output: ${deadEndNames}. This creates dead ends in your workflow.`
       );
     }
 
@@ -341,7 +348,7 @@ export class ProjectController {
     const hasCycles = this.detectCycles();
     if (hasCycles) {
       errors.push(
-        "Your agent system contains cycles (A→B→C→A). This cause infinite processing loop and should be avoided. Please check your connections.",
+        'Your agent system contains cycles (A→B→C→A). This cause infinite processing loop and should be avoided. Please check your connections.'
       );
     }
 
@@ -351,11 +358,7 @@ export class ProjectController {
   /**
    * Check if a path exists between two nodes using DFS
    */
-  private checkPathExists(
-    startNodeId: string,
-    endNodeId: string,
-    visited: Set<string>,
-  ): boolean {
+  private checkPathExists(startNodeId: string, endNodeId: string, visited: Set<string>): boolean {
     if (startNodeId === endNodeId) {
       return true; // Path found
     }
@@ -364,15 +367,12 @@ export class ProjectController {
 
     // Find all outgoing edges
     const outgoingEdges = this.projectData.interactions.filter(
-      (interaction) => interaction.participants[0] === startNodeId,
+      interaction => interaction.participants[0] === startNodeId
     );
 
     for (const edge of outgoingEdges) {
       const nextNodeId = edge.participants[1];
-      if (
-        !visited.has(nextNodeId) &&
-        this.checkPathExists(nextNodeId, endNodeId, visited)
-      ) {
+      if (!visited.has(nextNodeId) && this.checkPathExists(nextNodeId, endNodeId, visited)) {
         return true;
       }
     }
@@ -402,7 +402,7 @@ export class ProjectController {
 
       // Find all outgoing edges
       const outgoingEdges = this.projectData.interactions.filter(
-        (interaction) => interaction.participants[0] === nodeId,
+        interaction => interaction.participants[0] === nodeId
       );
 
       for (const edge of outgoingEdges) {
@@ -442,24 +442,24 @@ export class ProjectController {
     const { isValid, errors, warnings } = this.validateProject();
 
     if (!isValid) {
-      console.error("Project validation failed:", errors);
+      console.error('Project validation failed:', errors);
       return {
         success: false,
         errors,
         warnings,
       };
     } else if (warnings.length > 0) {
-      console.warn("Project validation warnings:", warnings);
+      console.warn('Project validation warnings:', warnings);
     }
-    console.log("Project validation passed");
+    console.log('Project validation passed');
 
     // Convert to LDL and export
     const ldlData = this.convertToLDL();
     const result = await ApiService.exportProject(ldlData);
 
-    console.log("Export result:", result);
+    console.log('Export result:', result);
 
-    if (typeof result === "object") {
+    if (typeof result === 'object') {
       return result;
     }
 
@@ -471,13 +471,13 @@ export class ProjectController {
    */
   private convertToLDL(): any {
     // Clean up any positions - LDL doesn't need position data
-    const agents = this.projectData.agents.map((agent) => {
+    const agents = this.projectData.agents.map(agent => {
       // Create a clean copy without position
       const { position, ...cleanAgent } = agent;
       return cleanAgent;
     });
 
-    const tools = this.projectData.tools.map((tool) => {
+    const tools = this.projectData.tools.map(tool => {
       // Create a clean copy without position
       const { position, ...cleanTool } = tool;
       return cleanTool;
@@ -507,42 +507,38 @@ export class ProjectController {
     try {
       // Validate basic LDL structure
       if (!ldlData.project || !ldlData.agents) {
-        throw new Error("Invalid LDL data: Missing required fields");
+        throw new Error('Invalid LDL data: Missing required fields');
       }
 
       // Check for user input and output nodes
-      const hasInputNode = ldlData.agents.some(
-        (a: any) => a.id === "user-input",
-      );
-      const hasOutputNode = ldlData.agents.some(
-        (a: any) => a.id === "user-output",
-      );
+      const hasInputNode = ldlData.agents.some((a: any) => a.id === 'user-input');
+      const hasOutputNode = ldlData.agents.some((a: any) => a.id === 'user-output');
 
       if (!hasInputNode || !hasOutputNode) {
         // Add missing nodes
         if (!hasInputNode) {
           ldlData.agents.push({
-            id: "user-input",
-            type: "System",
-            name: "User Input",
-            description: "Entry point for user requests",
-            subtype: "input",
-            capabilities: ["input-processing"],
-            memory: { type: "short-term" },
-            learning: { type: "none" },
+            id: 'user-input',
+            type: 'System',
+            name: 'User Input',
+            description: 'Entry point for user requests',
+            subtype: 'input',
+            capabilities: ['input-processing'],
+            memory: { type: 'short-term' },
+            learning: { type: 'none' },
           });
         }
 
         if (!hasOutputNode) {
           ldlData.agents.push({
-            id: "user-output",
-            type: "System",
-            name: "User Output",
-            description: "Exit point for system responses",
-            subtype: "output",
-            capabilities: ["output-processing"],
-            memory: { type: "short-term" },
-            learning: { type: "none" },
+            id: 'user-output',
+            type: 'System',
+            name: 'User Output',
+            description: 'Exit point for system responses',
+            subtype: 'output',
+            capabilities: ['output-processing'],
+            memory: { type: 'short-term' },
+            learning: { type: 'none' },
           });
         }
       }
@@ -551,7 +547,7 @@ export class ProjectController {
       const processedData = ApiService.processImportedData(ldlData);
 
       if (!processedData) {
-        throw new Error("Failed to process import data");
+        throw new Error('Failed to process import data');
       }
 
       // Replace existing project data with imported data
@@ -559,7 +555,7 @@ export class ProjectController {
       this.notifyChange();
       return true;
     } catch (error) {
-      console.error("Error importing LDL data:", error);
+      console.error('Error importing LDL data:', error);
       return false;
     }
   }
@@ -567,7 +563,7 @@ export class ProjectController {
   /**
    * Export project data to a string in JSON or YAML
    */
-  exportAs(format: "json" | "yaml"): string {
+  exportAs(format: 'json' | 'yaml'): string {
     // Convert to LDL object
     const ldl = this.convertToLDL();
     return serializeLdl(ldl, format);
@@ -576,15 +572,12 @@ export class ProjectController {
   /**
    * Import project data from a string (JSON or YAML)
    */
-  async importFromText(
-    text: string,
-    format: "json" | "yaml",
-  ): Promise<boolean> {
+  async importFromText(text: string, format: 'json' | 'yaml'): Promise<boolean> {
     try {
       const ldlData = deserializeLdl(text, format);
       return await this.importFromLDL(ldlData);
     } catch (err) {
-      console.error("Error parsing import text:", err);
+      console.error('Error parsing import text:', err);
       return false;
     }
   }
@@ -595,12 +588,139 @@ export class ProjectController {
   public clearCanvas(): void {
     // Keep only system agents
     this.projectData.agents = this.projectData.agents.filter(
-      (agent) => agent.id === 'user-input' || agent.id === 'user-output'
+      agent => agent.id === 'user-input' || agent.id === 'user-output'
     );
     // Remove all tools and interactions
     this.projectData.tools = [];
     this.projectData.interactions = [];
     this.notifyChange();
+  }
+
+  /**
+   * Load a project by ID from the backend
+   */
+  async loadProjectById(projectId: number): Promise<boolean> {
+    try {
+      // The ApiService.getProjectById already applies Sugiyama layout
+      const projectData = await ApiService.getProjectById(projectId);
+      
+      console.log("Project data received from API:", projectData);
+      
+      if (!projectData) {
+        console.error("Failed to load project - no data returned");
+        return false;
+      }
+      
+      // Reset current project data
+      this.projectData = new ProjectData(
+        new Project(
+          projectData.project.name,
+          projectData.project.version,
+          projectData.project.description
+        )
+      );
+      
+      // Reset all collections
+      this.projectData.agents = [];
+      this.projectData.tools = [];
+      this.projectData.interactions = [];
+      
+      // Add POSITIONED agents from the API response (already using Sugiyama layout)
+      // First add system agents to ensure they're first in the list
+      const userInputAgent = projectData.agents.find((a: any) => a.id === "user-input");
+      const userOutputAgent = projectData.agents.find((a: any) => a.id === "user-output");
+      
+      // Add user-input agent (use factory + override position if provided)
+      if (userInputAgent) {
+        const inputNode = CanvasObjectFactory.createUserInputAgent();
+        inputNode.position = userInputAgent.position;
+        this.projectData.agents.push(inputNode);
+      } else {
+        this.projectData.agents.push(CanvasObjectFactory.createUserInputAgent());
+      }
+      
+      // Add user-output agent (use factory + override position if provided)
+      if (userOutputAgent) {
+        const outputNode = CanvasObjectFactory.createUserOutputAgent();
+        outputNode.position = userOutputAgent.position;
+        this.projectData.agents.push(outputNode);
+      } else {
+        this.projectData.agents.push(CanvasObjectFactory.createUserOutputAgent());
+      }
+      
+      // Add all non-system agents with their positions from Sugiyama layout
+      projectData.agents.forEach((agent: any) => {
+        // Skip user-input and user-output as we've handled them above
+        if (agent.id !== "user-input" && agent.id !== "user-output") {
+          // Ensure all agent IDs are strings to prevent type errors
+          const agentId = String(agent.agent_id || agent.id);
+          
+          this.projectData.agents.push(
+            new Agent(
+              agentId,
+              agent.type || "AI",
+              agent.name || "Unnamed Agent",
+              agent.description || "",
+              agent.subtype || "",
+              agent.model || {},
+              agent.capabilities || [],
+              agent.memory || { type: "short-term" },
+              agent.learning || { type: "none" },
+              agent.position // Use position from Sugiyama layout
+            )
+          );
+        }
+      });
+      
+      // Add tools with their positions from API service
+      if (projectData.tools && projectData.tools.length > 0) {
+        projectData.tools.forEach((tool: any) => {
+          const toolId = String(tool.id || tool.tool_id);
+          this.projectData.tools.push(
+            new Tool(
+              toolId,
+              tool.description || "",
+              tool.type || "Information",
+              tool.name || "Unnamed Tool",
+              tool.agentId ? String(tool.agentId) : "",
+              tool.subtype || "",
+              tool.accessibleBy || [],
+              tool.authentication || {},
+              tool.parameters || {},
+              tool.position // Use position calculated by ApiService
+            )
+          );
+        });
+      }
+      
+      // Add interactions with string IDs
+      if (projectData.interactions && projectData.interactions.length > 0) {
+        projectData.interactions.forEach((interaction: any) => {
+          if (interaction.participants && interaction.participants.length >= 2) {
+            // Ensure participant IDs are strings
+            const participants = interaction.participants.map((p: any) => String(p));
+            
+            this.projectData.interactions.push(
+              new Interaction(
+                interaction.id,
+                interaction.name || `Connection ${participants[0]}-${participants[1]}`,
+                interaction.description || "",
+                interaction.type || "AgentAgent",
+                participants,
+                interaction.protocol || { type: "DirectedMessaging", messageTypes: ["task"] }
+              )
+            );
+          }
+        });
+      }
+      
+      // Notify changes
+      this.notifyChange();
+      return true;
+    } catch (error) {
+      console.error("Error loading project:", error);
+      return false;
+    }
   }
 
   /**

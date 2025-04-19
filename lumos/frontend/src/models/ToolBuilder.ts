@@ -1,4 +1,4 @@
-import { Tool, Position } from "./types";
+import { Tool, Position } from './types';
 
 /**
  * Builder pattern implementation for creating Tool objects
@@ -8,9 +8,9 @@ export class ToolBuilder {
   private id: string;
   private description: string;
   private type: string;
-  private name: string = "";
-  private agentId: string = "";
-  private subtype: string = "";
+  private name: string = '';
+  private agentId: string = '';
+  private subtype: string = '';
   private accessibleBy: string[] = [];
   private authentication: Record<string, any> = {};
   private parameters: Record<string, any> = {};
@@ -28,10 +28,7 @@ export class ToolBuilder {
   /**
    * Creates a new builder instance with a timestamp-based ID
    */
-  static create(
-    description: string,
-    type: string = "Information",
-  ): ToolBuilder {
+  static create(description: string, type: string = 'Information'): ToolBuilder {
     return new ToolBuilder(`tool-${Date.now()}`, description, type);
   }
 
@@ -114,7 +111,7 @@ export class ToolBuilder {
       this.accessibleBy,
       this.authentication,
       this.parameters,
-      this.position,
+      this.position
     );
   }
 }

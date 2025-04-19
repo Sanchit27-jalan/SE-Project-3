@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Button,
   CircularProgress,
@@ -20,16 +20,16 @@ import {
   Divider,
   Menu,
   MenuItem,
-} from "@mui/material";
-import SaveIcon from "@mui/icons-material/Save";
-import PublishIcon from "@mui/icons-material/Publish";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import LinkIcon from "@mui/icons-material/Link";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import GetAppIcon from "@mui/icons-material/GetApp";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+} from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
+import PublishIcon from '@mui/icons-material/Publish';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import LinkIcon from '@mui/icons-material/Link';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 interface ExportButtonProps {
   onExport: () => Promise<
@@ -42,19 +42,15 @@ interface ExportButtonProps {
       }
   >;
   onSave: () => Promise<boolean>;
-  onDownload: (format: "json" | "yaml") => void;
+  onDownload: (format: 'json' | 'yaml') => void;
 }
 
-const ExportButton: React.FC<ExportButtonProps> = ({
-  onExport,
-  onSave,
-  onDownload,
-}) => {
+const ExportButton: React.FC<ExportButtonProps> = ({ onExport, onSave, onDownload }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
+  const [statusMessage, setStatusMessage] = useState('');
 
   // State for export status dialog
   const [showStatusDialog, setShowStatusDialog] = useState(false);
@@ -64,9 +60,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   const [exportSuccess, setExportSuccess] = useState(false);
 
   // State for download menu
-  const [downloadAnchorEl, setDownloadAnchorEl] = useState<HTMLElement | null>(
-    null,
-  );
+  const [downloadAnchorEl, setDownloadAnchorEl] = useState<HTMLElement | null>(null);
   const isDownloadMenuOpen = Boolean(downloadAnchorEl);
 
   const handleDownloadClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -75,7 +69,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   const handleDownloadMenuClose = () => {
     setDownloadAnchorEl(null);
   };
-  const handleDownloadFormat = (format: "json" | "yaml") => {
+  const handleDownloadFormat = (format: 'json' | 'yaml') => {
     onDownload(format);
     handleDownloadMenuClose();
   };
@@ -90,7 +84,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       setValidationWarnings([]);
       setRuntimeUrl(undefined);
 
-      if (typeof result === "object") {
+      if (typeof result === 'object') {
         // Handle detailed response
         if (result.success) {
           setExportSuccess(true);
@@ -119,13 +113,13 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         setExportSuccess(true);
       } else {
         // Handle simple error response
-        setStatusMessage("Export failed. Please check console for details.");
+        setStatusMessage('Export failed. Please check console for details.');
         setShowError(true);
         setExportSuccess(false);
       }
     } catch (error) {
-      console.error("Error during export:", error);
-      setStatusMessage("Export failed. Please check console for details.");
+      console.error('Error during export:', error);
+      setStatusMessage('Export failed. Please check console for details.');
       setShowError(true);
       setExportSuccess(false);
     } finally {
@@ -138,15 +132,15 @@ const ExportButton: React.FC<ExportButtonProps> = ({
     try {
       const success = await onSave();
       if (success) {
-        setStatusMessage("Project checkpoint saved successfully!");
+        setStatusMessage('Project checkpoint saved successfully!');
         setShowSuccess(true);
       } else {
-        setStatusMessage("Save failed. Please check console for details.");
+        setStatusMessage('Save failed. Please check console for details.');
         setShowError(true);
       }
     } catch (error) {
-      console.error("Error during save:", error);
-      setStatusMessage("Save failed. Please check console for details.");
+      console.error('Error during save:', error);
+      setStatusMessage('Save failed. Please check console for details.');
       setShowError(true);
     } finally {
       setIsSaving(false);
@@ -158,12 +152,12 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       navigator.clipboard
         .writeText(runtimeUrl)
         .then(() => {
-          setStatusMessage("Runtime URL copied to clipboard!");
+          setStatusMessage('Runtime URL copied to clipboard!');
           setShowSuccess(true);
         })
-        .catch((err) => {
-          console.error("Failed to copy URL:", err);
-          setStatusMessage("Failed to copy URL to clipboard");
+        .catch(err => {
+          console.error('Failed to copy URL:', err);
+          setStatusMessage('Failed to copy URL to clipboard');
           setShowError(true);
         });
     }
@@ -194,29 +188,19 @@ const ExportButton: React.FC<ExportButtonProps> = ({
           open={isDownloadMenuOpen}
           onClose={handleDownloadMenuClose}
         >
-          <MenuItem onClick={() => handleDownloadFormat("json")}>
-            Export JSON
-          </MenuItem>
-          <MenuItem onClick={() => handleDownloadFormat("yaml")}>
-            Export YAML
-          </MenuItem>
+          <MenuItem onClick={() => handleDownloadFormat('json')}>Export JSON</MenuItem>
+          <MenuItem onClick={() => handleDownloadFormat('yaml')}>Export YAML</MenuItem>
         </Menu>
 
         <Tooltip title="Save checkpoint without validation">
           <Button
             variant="contained"
             color="primary"
-            startIcon={
-              isSaving ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                <SaveIcon />
-              )
-            }
+            startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
             onClick={handleSave}
             disabled={isSaving || isExporting}
           >
-            {isSaving ? "Saving..." : "Save Checkpoint"}
+            {isSaving ? 'Saving...' : 'Save Checkpoint'}
           </Button>
         </Tooltip>
 
@@ -225,16 +209,12 @@ const ExportButton: React.FC<ExportButtonProps> = ({
             variant="contained"
             color="success"
             startIcon={
-              isExporting ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                <PublishIcon />
-              )
+              isExporting ? <CircularProgress size={20} color="inherit" /> : <PublishIcon />
             }
             onClick={handleExport}
             disabled={isSaving || isExporting}
           >
-            {isExporting ? "Exporting..." : "Export Project"}
+            {isExporting ? 'Exporting...' : 'Export Project'}
           </Button>
         </Tooltip>
       </Stack>
@@ -246,42 +226,27 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>
-          {exportSuccess ? "Export Successful" : "Export Failed"}
-        </DialogTitle>
+        <DialogTitle>{exportSuccess ? 'Export Successful' : 'Export Failed'}</DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2}>
             {/* Success or Error Icon */}
             <Box display="flex" alignItems="center" mt={1} mb={1}>
               {exportSuccess ? (
-                <CheckCircleOutlineIcon
-                  color="success"
-                  fontSize="large"
-                  sx={{ mr: 1 }}
-                />
+                <CheckCircleOutlineIcon color="success" fontSize="large" sx={{ mr: 1 }} />
               ) : (
-                <ErrorOutlineIcon
-                  color="error"
-                  fontSize="large"
-                  sx={{ mr: 1 }}
-                />
+                <ErrorOutlineIcon color="error" fontSize="large" sx={{ mr: 1 }} />
               )}
               <Typography variant="h6">
                 {exportSuccess
-                  ? "Your multi-agent system has been successfully exported."
-                  : "Export failed due to validation errors."}
+                  ? 'Your multi-agent system has been successfully exported.'
+                  : 'Export failed due to validation errors.'}
               </Typography>
             </Box>
 
             {/* Validation Errors */}
             {validationErrors.length > 0 && (
               <Box>
-                <Typography
-                  variant="subtitle1"
-                  color="error"
-                  fontWeight="bold"
-                  gutterBottom
-                >
+                <Typography variant="subtitle1" color="error" fontWeight="bold" gutterBottom>
                   Errors that must be fixed:
                 </Typography>
                 <List dense>
@@ -300,12 +265,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
             {/* Validation Warnings */}
             {validationWarnings.length > 0 && (
               <Box>
-                <Typography
-                  variant="subtitle1"
-                  color="warning.main"
-                  fontWeight="bold"
-                  gutterBottom
-                >
+                <Typography variant="subtitle1" color="warning.main" fontWeight="bold" gutterBottom>
                   Warnings (may affect system behavior):
                 </Typography>
                 <List dense>
@@ -330,11 +290,11 @@ const ExportButton: React.FC<ExportButtonProps> = ({
                 </Typography>
                 <Box
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    bgcolor: "background.paper",
-                    border: "1px solid",
-                    borderColor: "divider",
+                    display: 'flex',
+                    alignItems: 'center',
+                    bgcolor: 'background.paper',
+                    border: '1px solid',
+                    borderColor: 'divider',
                     borderRadius: 1,
                     p: 2,
                     gap: 1,
@@ -345,23 +305,19 @@ const ExportButton: React.FC<ExportButtonProps> = ({
                     href={runtimeUrl}
                     target="_blank"
                     rel="noopener"
-                    sx={{ flexGrow: 1, wordBreak: "break-all" }}
+                    sx={{ flexGrow: 1, wordBreak: 'break-all' }}
                   >
                     {runtimeUrl}
                   </Link>
                   <Tooltip title="Copy URL to clipboard">
-                    <Button
-                      onClick={copyRuntimeUrl}
-                      size="small"
-                      startIcon={<ContentCopyIcon />}
-                    >
+                    <Button onClick={copyRuntimeUrl} size="small" startIcon={<ContentCopyIcon />}>
                       Copy
                     </Button>
                   </Tooltip>
                 </Box>
                 <Typography variant="body2" color="text.secondary" mt={1}>
-                  Your multi-agent system is now hosted at this URL. Click the
-                  link to interact with it.
+                  Your multi-agent system is now hosted at this URL. Click the link to interact with
+                  it.
                 </Typography>
               </Box>
             )}
@@ -370,12 +326,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         <DialogActions>
           <Button onClick={() => setShowStatusDialog(false)}>Close</Button>
           {runtimeUrl && (
-            <Button
-              variant="contained"
-              color="primary"
-              href={runtimeUrl}
-              target="_blank"
-            >
+            <Button variant="contained" color="primary" href={runtimeUrl} target="_blank">
               Open Runtime
             </Button>
           )}
@@ -383,31 +334,23 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       </Dialog>
 
       {/* Simple toast notifications */}
-      <Snackbar
-        open={showSuccess}
-        autoHideDuration={4000}
-        onClose={() => setShowSuccess(false)}
-      >
+      <Snackbar open={showSuccess} autoHideDuration={4000} onClose={() => setShowSuccess(false)}>
         <Alert
           onClose={() => setShowSuccess(false)}
           severity="success"
           variant="filled"
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {statusMessage}
         </Alert>
       </Snackbar>
 
-      <Snackbar
-        open={showError}
-        autoHideDuration={4000}
-        onClose={() => setShowError(false)}
-      >
+      <Snackbar open={showError} autoHideDuration={4000} onClose={() => setShowError(false)}>
         <Alert
           onClose={() => setShowError(false)}
           severity="error"
           variant="filled"
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {statusMessage}
         </Alert>

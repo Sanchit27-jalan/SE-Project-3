@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Handle, Position } from "reactflow";
+import React, { useState } from 'react';
+import { Handle, Position } from 'reactflow';
 import {
   Box,
   Typography,
@@ -10,15 +10,15 @@ import {
   Badge,
   Divider,
   Paper,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
-import BuildIcon from "@mui/icons-material/Build";
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import BuildIcon from '@mui/icons-material/Build';
 // import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
-import CallMadeIcon from "@mui/icons-material/CallMade";
-import CallReceivedIcon from "@mui/icons-material/CallReceived";
+import CallMadeIcon from '@mui/icons-material/CallMade';
+import CallReceivedIcon from '@mui/icons-material/CallReceived';
 // import InfoIcon from "@mui/icons-material/Info";
-import { Agent, Tool } from "../../models/types";
+import { Agent, Tool } from '../../models/types';
 
 interface AgentNodeProps {
   id: string;
@@ -53,51 +53,41 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
   };
 
   // Determine if this is a system node (input/output)
-  const isSystemNode = id === "user-input" || id === "user-output";
-  const isInputNode = id === "user-input";
-  const isOutputNode = id === "user-output";
+  const isSystemNode = id === 'user-input' || id === 'user-output';
+  const isInputNode = id === 'user-input';
+  const isOutputNode = id === 'user-output';
 
   return (
     <Box
       sx={{
-        position: "relative",
+        position: 'relative',
         padding: 2,
         minWidth: 250,
         maxWidth: 350,
         border: `2px solid ${
-          isSystemNode
-            ? "#9c27b0"
-            : selected
-              ? "#1976d2"
-              : "rgba(255, 255, 255, 0.3)"
+          isSystemNode ? '#9c27b0' : selected ? '#1976d2' : 'rgba(255, 255, 255, 0.3)'
         }`,
         borderRadius: 2,
-        bgcolor: isSystemNode
-          ? "rgba(156, 39, 176, 0.15)"
-          : "rgba(25, 118, 210, 0.1)",
-        textAlign: "center",
-        userSelect: "none",
-        color: "white",
+        bgcolor: isSystemNode ? 'rgba(156, 39, 176, 0.15)' : 'rgba(25, 118, 210, 0.1)',
+        textAlign: 'center',
+        userSelect: 'none',
+        color: 'white',
       }}
     >
       {/* Enhanced Input Handle with Visual Indicator */}
       {!isInputNode && (
-        <Tooltip
-          title="Input: Connect from another agent to this node"
-          placement="left"
-          arrow
-        >
+        <Tooltip title="Input: Connect from another agent to this node" placement="left" arrow>
           <Box
             sx={{
-              position: "absolute",
+              position: 'absolute',
               left: -8,
-              top: "50%",
-              transform: "translateY(-50%)",
+              top: '50%',
+              transform: 'translateY(-50%)',
               width: 16,
               height: 40,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-start",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
             }}
           >
             <Handle
@@ -106,44 +96,44 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
               style={{
                 width: 12,
                 height: 12,
-                backgroundColor: "#4CAF50",
-                border: "2px solid white",
+                backgroundColor: '#4CAF50',
+                border: '2px solid white',
                 zIndex: 10,
               }}
             />
             <Paper
               elevation={0}
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 left: 14,
                 width: 14,
                 height: 30,
-                bgcolor: "rgba(76, 175, 80, 0.2)",
+                bgcolor: 'rgba(76, 175, 80, 0.2)',
                 borderTopRightRadius: 4,
                 borderBottomRightRadius: 4,
-                display: selected ? "block" : "none",
-                "&::after": {
+                display: selected ? 'block' : 'none',
+                '&::after': {
                   content: '""',
-                  position: "absolute",
-                  top: "calc(50% - 8px)",
+                  position: 'absolute',
+                  top: 'calc(50% - 8px)',
                   left: 4,
                   width: 0,
                   height: 0,
-                  borderTop: "8px solid transparent",
-                  borderBottom: "8px solid transparent",
-                  borderRight: "6px solid rgba(76, 175, 80, 0.4)",
+                  borderTop: '8px solid transparent',
+                  borderBottom: '8px solid transparent',
+                  borderRight: '6px solid rgba(76, 175, 80, 0.4)',
                 },
               }}
             />
             <CallReceivedIcon
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 left: 10,
                 top: -18,
-                fontSize: "1rem",
-                color: "rgba(76, 175, 80, 0.6)",
+                fontSize: '1rem',
+                color: 'rgba(76, 175, 80, 0.6)',
                 opacity: selected ? 1 : 0,
-                transition: "opacity 0.2s",
+                transition: 'opacity 0.2s',
               }}
             />
           </Box>
@@ -152,22 +142,18 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
 
       {/* Enhanced Output Handle with Visual Indicator */}
       {!isOutputNode && (
-        <Tooltip
-          title="Output: Connect this agent to another node"
-          placement="right"
-          arrow
-        >
+        <Tooltip title="Output: Connect this agent to another node" placement="right" arrow>
           <Box
             sx={{
-              position: "absolute",
+              position: 'absolute',
               right: -8,
-              top: "50%",
-              transform: "translateY(-50%)",
+              top: '50%',
+              transform: 'translateY(-50%)',
               width: 16,
               height: 40,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
             }}
           >
             <Handle
@@ -176,44 +162,44 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
               style={{
                 width: 12,
                 height: 12,
-                backgroundColor: "#2196F3",
-                border: "2px solid white",
+                backgroundColor: '#2196F3',
+                border: '2px solid white',
                 zIndex: 10,
               }}
             />
             <Paper
               elevation={0}
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 right: 14,
                 width: 14,
                 height: 30,
-                bgcolor: "rgba(33, 150, 243, 0.2)",
+                bgcolor: 'rgba(33, 150, 243, 0.2)',
                 borderTopLeftRadius: 4,
                 borderBottomLeftRadius: 4,
-                display: selected ? "block" : "none",
-                "&::before": {
+                display: selected ? 'block' : 'none',
+                '&::before': {
                   content: '""',
-                  position: "absolute",
-                  top: "calc(50% - 8px)",
+                  position: 'absolute',
+                  top: 'calc(50% - 8px)',
                   right: 4,
                   width: 0,
                   height: 0,
-                  borderTop: "8px solid transparent",
-                  borderBottom: "8px solid transparent",
-                  borderLeft: "6px solid rgba(33, 150, 243, 0.4)",
+                  borderTop: '8px solid transparent',
+                  borderBottom: '8px solid transparent',
+                  borderLeft: '6px solid rgba(33, 150, 243, 0.4)',
                 },
               }}
             />
             <CallMadeIcon
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 right: 10,
                 top: -18,
-                fontSize: "1rem",
-                color: "rgba(33, 150, 243, 0.6)",
+                fontSize: '1rem',
+                color: 'rgba(33, 150, 243, 0.6)',
                 opacity: selected ? 1 : 0,
-                transition: "opacity 0.2s",
+                transition: 'opacity 0.2s',
               }}
             />
           </Box>
@@ -226,13 +212,13 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
           onClick={handleDelete}
           size="small"
           sx={{
-            position: "absolute",
+            position: 'absolute',
             top: 5,
             right: 5,
-            color: "white",
-            "&:hover": {
-              color: "red",
-              backgroundColor: "rgba(255, 0, 0, 0.1)",
+            color: 'white',
+            '&:hover': {
+              color: 'red',
+              backgroundColor: 'rgba(255, 0, 0, 0.1)',
             },
           }}
         >
@@ -242,21 +228,14 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
 
       {/* Node header */}
       <Box display="flex" alignItems="center" justifyContent="center" mb={1}>
-        <SmartToyIcon
-          sx={{ mr: 1, color: isSystemNode ? "#9c27b0" : "#1976d2" }}
-        />
+        <SmartToyIcon sx={{ mr: 1, color: isSystemNode ? '#9c27b0' : '#1976d2' }} />
         <Typography variant="subtitle1" fontWeight="bold">
           {agent.name}
         </Typography>
       </Box>
 
       {/* Agent ID */}
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        display="block"
-        gutterBottom
-      >
+      <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
         ID: {id}
       </Typography>
 
@@ -265,7 +244,7 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
         {agent.description}
       </Typography>
 
-      <Divider sx={{ my: 1.5, bgcolor: "rgba(255, 255, 255, 0.1)" }} />
+      <Divider sx={{ my: 1.5, bgcolor: 'rgba(255, 255, 255, 0.1)' }} />
 
       {/* Agent attributes */}
       <Box mt={1} display="flex" flexDirection="column" gap={1}>
@@ -278,9 +257,9 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
             label={agent.type}
             size="small"
             sx={{
-              fontSize: "0.7rem",
+              fontSize: '0.7rem',
               height: 24,
-              bgcolor: "rgba(25, 118, 210, 0.2)",
+              bgcolor: 'rgba(25, 118, 210, 0.2)',
             }}
           />
           {agent.subtype && (
@@ -288,9 +267,9 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
               label={agent.subtype}
               size="small"
               sx={{
-                fontSize: "0.7rem",
+                fontSize: '0.7rem',
                 height: 24,
-                bgcolor: "rgba(25, 118, 210, 0.1)",
+                bgcolor: 'rgba(25, 118, 210, 0.1)',
                 ml: 0.5,
               }}
             />
@@ -298,7 +277,7 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
         </Box>
 
         {/* Agent model info */}
-        {agent.type === "AI" && agent.model?.llmType && (
+        {agent.type === 'AI' && agent.model?.llmType && (
           <Box display="flex" alignItems="center" justifyContent="center">
             <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
               Model:
@@ -307,9 +286,9 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
               label={agent.model.llmType}
               size="small"
               sx={{
-                fontSize: "0.7rem",
+                fontSize: '0.7rem',
                 height: 24,
-                bgcolor: "rgba(121, 80, 242, 0.2)",
+                bgcolor: 'rgba(121, 80, 242, 0.2)',
               }}
             />
           </Box>
@@ -323,9 +302,9 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
                 label={`Memory: ${agent.memory.type}`}
                 size="small"
                 sx={{
-                  fontSize: "0.65rem",
+                  fontSize: '0.65rem',
                   height: 20,
-                  bgcolor: "rgba(255, 152, 0, 0.2)",
+                  bgcolor: 'rgba(255, 152, 0, 0.2)',
                 }}
               />
             </Tooltip>
@@ -336,9 +315,9 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
                 label={`Learning: ${agent.learning.type}`}
                 size="small"
                 sx={{
-                  fontSize: "0.65rem",
+                  fontSize: '0.65rem',
                   height: 20,
-                  bgcolor: "rgba(233, 30, 99, 0.2)",
+                  bgcolor: 'rgba(233, 30, 99, 0.2)',
                 }}
               />
             </Tooltip>
@@ -346,27 +325,26 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
         </Box>
       </Box>
 
-      <Divider sx={{ my: 1.5, bgcolor: "rgba(255, 255, 255, 0.1)" }} />
+      <Divider sx={{ my: 1.5, bgcolor: 'rgba(255, 255, 255, 0.1)' }} />
 
       {/* Tools indicator button with badge */}
       <Box mt={1} mb={1} display="flex" justifyContent="center">
         <Badge
           badgeContent={tools.length}
           color="success"
-          sx={{ ".MuiBadge-badge": { fontSize: "0.65rem" } }}
+          sx={{ '.MuiBadge-badge': { fontSize: '0.65rem' } }}
         >
           <Tooltip
-            title={`${tools.length} tool${tools.length !== 1 ? "s" : ""} connected to this agent`}
+            title={`${tools.length} tool${tools.length !== 1 ? 's' : ''} connected to this agent`}
           >
             <IconButton
               onClick={handleToolsClick}
               size="medium"
               sx={{
-                color:
-                  tools.length > 0 ? "#4caf50" : "rgba(255, 255, 255, 0.5)",
-                border: `1px solid ${tools.length > 0 ? "rgba(76, 175, 80, 0.5)" : "rgba(255, 255, 255, 0.2)"}`,
-                "&:hover": {
-                  backgroundColor: "rgba(76, 175, 80, 0.1)",
+                color: tools.length > 0 ? '#4caf50' : 'rgba(255, 255, 255, 0.5)',
+                border: `1px solid ${tools.length > 0 ? 'rgba(76, 175, 80, 0.5)' : 'rgba(255, 255, 255, 0.2)'}`,
+                '&:hover': {
+                  backgroundColor: 'rgba(76, 175, 80, 0.1)',
                 },
               }}
             >
@@ -380,19 +358,19 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
           anchorEl={toolsAnchorEl}
           onClose={handleToolsClose}
           anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
+            vertical: 'bottom',
+            horizontal: 'center',
           }}
           transformOrigin={{
-            vertical: "top",
-            horizontal: "center",
+            vertical: 'top',
+            horizontal: 'center',
           }}
           PaperProps={{
             sx: {
               p: 2,
               minWidth: 300,
               maxWidth: 400,
-              bgcolor: "#1e1e1e",
+              bgcolor: '#1e1e1e',
             },
           }}
         >
@@ -401,33 +379,29 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
           </Typography>
 
           {tools.length > 0 ? (
-            tools.map((tool) => (
+            tools.map(tool => (
               <Box
                 key={tool.id}
                 sx={{
                   mt: 1,
                   mb: 2,
-                  border: "1px solid rgba(76, 175, 80, 0.3)",
+                  border: '1px solid rgba(76, 175, 80, 0.3)',
                   borderRadius: 1,
                   p: 1.5,
                 }}
               >
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
+                <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Box display="flex" alignItems="center">
-                    <BuildIcon sx={{ mr: 1, color: "#4caf50" }} />
+                    <BuildIcon sx={{ mr: 1, color: '#4caf50' }} />
                     <Typography variant="subtitle2">{tool.name}</Typography>
                   </Box>
                   <Chip
                     label={tool.type}
                     size="small"
                     sx={{
-                      bgcolor: "rgba(76, 175, 80, 0.15)",
-                      color: "#4caf50",
-                      fontSize: "0.7rem",
+                      bgcolor: 'rgba(76, 175, 80, 0.15)',
+                      color: '#4caf50',
+                      fontSize: '0.7rem',
                     }}
                   />
                 </Box>
@@ -446,34 +420,28 @@ const AgentNode: React.FC<AgentNodeProps> = ({ id, data, selected }) => {
 
       {/* Agent capabilities */}
       {agent.capabilities && agent.capabilities.length > 0 && (
-        <Box
-          mt={1}
-          display="flex"
-          flexWrap="wrap"
-          justifyContent="center"
-          gap={0.5}
-        >
+        <Box mt={1} display="flex" flexWrap="wrap" justifyContent="center" gap={0.5}>
           {agent.capabilities.slice(0, 3).map((capability, index) => (
             <Chip
               key={index}
               label={capability}
               size="small"
               sx={{
-                fontSize: "0.65rem",
+                fontSize: '0.65rem',
                 height: 20,
-                bgcolor: "rgba(25, 118, 210, 0.2)",
+                bgcolor: 'rgba(25, 118, 210, 0.2)',
               }}
             />
           ))}
           {agent.capabilities.length > 3 && (
-            <Tooltip title={agent.capabilities.slice(3).join(", ")}>
+            <Tooltip title={agent.capabilities.slice(3).join(', ')}>
               <Chip
                 label={`+${agent.capabilities.length - 3}`}
                 size="small"
                 sx={{
-                  fontSize: "0.65rem",
+                  fontSize: '0.65rem',
                   height: 20,
-                  bgcolor: "rgba(25, 118, 210, 0.1)",
+                  bgcolor: 'rgba(25, 118, 210, 0.1)',
                 }}
               />
             </Tooltip>

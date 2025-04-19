@@ -1,6 +1,6 @@
-import { Agent, Tool } from "./types";
-import { AgentBuilder } from "./AgentBuilder";
-import { ToolBuilder } from "./ToolBuilder";
+import { Agent, Tool } from './types';
+import { AgentBuilder } from './AgentBuilder';
+import { ToolBuilder } from './ToolBuilder';
 
 /**
  * Factory for creating canvas objects (agents and tools)
@@ -31,20 +31,18 @@ export class CanvasObjectFactory {
    * Creates a new agent from AI generation result
    */
   static createAgentFromGeneration(generatedData: any): Agent {
-    const builder = AgentBuilder.create(generatedData.type || "AI");
+    const builder = AgentBuilder.create(generatedData.type || 'AI');
 
     return builder
-      .withName(generatedData.name || "")
-      .withDescription(generatedData.description || "")
-      .withSubtype(generatedData.subtype || "")
+      .withName(generatedData.name || '')
+      .withDescription(generatedData.description || '')
+      .withSubtype(generatedData.subtype || '')
       .withModel(
-        generatedData.type === "AI"
-          ? { llmType: generatedData.model?.llmType || "gpt-4" }
-          : {},
+        generatedData.type === 'AI' ? { llmType: generatedData.model?.llmType || 'gpt-4' } : {}
       )
       .withCapabilities(generatedData.capabilities || [])
-      .withMemory({ type: "short-term" })
-      .withLearning({ type: "none" })
+      .withMemory({ type: 'short-term' })
+      .withLearning({ type: 'none' })
       .build();
   }
 
@@ -71,13 +69,13 @@ export class CanvasObjectFactory {
    */
   static createToolFromGeneration(generatedData: any): Tool {
     const builder = ToolBuilder.create(
-      generatedData.description || "",
-      generatedData.type || "Information",
+      generatedData.description || '',
+      generatedData.type || 'Information'
     );
 
     return builder
-      .withName(generatedData.name || "")
-      .withSubtype(generatedData.subtype || "")
+      .withName(generatedData.name || '')
+      .withSubtype(generatedData.subtype || '')
       .withParameters(generatedData.parameters || {})
       .build();
   }
@@ -86,72 +84,60 @@ export class CanvasObjectFactory {
    * Creates a new default agent of the specified type
    * Useful for quick creation of new agents
    */
-  static createDefaultAgent(type: string = "AI"): Agent {
+  static createDefaultAgent(type: string = 'AI'): Agent {
     const builder = AgentBuilder.create(type);
 
     switch (type) {
-      case "AI":
+      case 'AI':
         return builder
-          .withName("New AI Agent")
-          .withDescription("AI-powered agent")
-          .withSubtype("assistant")
-          .withModel({ llmType: "gpt-4" })
-          .withCapabilities(["conversation"])
+          .withName('New AI Agent')
+          .withDescription('AI-powered agent')
+          .withSubtype('assistant')
+          .withModel({ llmType: 'gpt-4' })
+          .withCapabilities(['conversation'])
           .build();
 
-      case "Deterministic":
+      case 'Deterministic':
         return builder
-          .withName("New Rule Agent")
-          .withDescription("Rule-based deterministic agent")
-          .withSubtype("rule-based")
+          .withName('New Rule Agent')
+          .withDescription('Rule-based deterministic agent')
+          .withSubtype('rule-based')
           .build();
 
-      case "Hybrid":
+      case 'Hybrid':
         return builder
-          .withName("New Hybrid Agent")
-          .withDescription("Agent with both AI and rule-based capabilities")
-          .withSubtype("hybrid")
-          .withModel({ llmType: "gpt-4" })
+          .withName('New Hybrid Agent')
+          .withDescription('Agent with both AI and rule-based capabilities')
+          .withSubtype('hybrid')
+          .withModel({ llmType: 'gpt-4' })
           .build();
 
       default:
-        return builder
-          .withName("New Agent")
-          .withDescription("Generic agent")
-          .build();
+        return builder.withName('New Agent').withDescription('Generic agent').build();
     }
   }
 
   /**
    * Creates a new default tool of the specified type
    */
-  static createDefaultTool(type: string = "Information"): Tool {
+  static createDefaultTool(type: string = 'Information'): Tool {
     const builder = ToolBuilder.create(`Default ${type} tool`, type);
 
     switch (type) {
-      case "Information":
-        return builder
-          .withName("Information Tool")
-          .withSubtype("data-retrieval")
-          .build();
+      case 'Information':
+        return builder.withName('Information Tool').withSubtype('data-retrieval').build();
 
-      case "Computational":
-        return builder
-          .withName("Computational Tool")
-          .withSubtype("processor")
-          .build();
+      case 'Computational':
+        return builder.withName('Computational Tool').withSubtype('processor').build();
 
-      case "Interaction":
-        return builder
-          .withName("Interaction Tool")
-          .withSubtype("interface")
-          .build();
+      case 'Interaction':
+        return builder.withName('Interaction Tool').withSubtype('interface').build();
 
-      case "Development":
-        return builder.withName("Development Tool").withSubtype("code").build();
+      case 'Development':
+        return builder.withName('Development Tool').withSubtype('code').build();
 
       default:
-        return builder.withName("Generic Tool").build();
+        return builder.withName('Generic Tool').build();
     }
   }
 
@@ -160,11 +146,11 @@ export class CanvasObjectFactory {
    * This is a special type of agent that represents user input in the system
    */
   static createUserInputAgent(): Agent {
-    return AgentBuilder.create("Deterministic")
-      .withId("user-input")
-      .withName("User Input")
-      .withDescription("Represents user input to the system")
-      .withSubtype("system")
+    return AgentBuilder.create('Deterministic')
+      .withId('user-input')
+      .withName('User Input')
+      .withDescription('Represents user input to the system')
+      .withSubtype('system')
       .withPosition({ x: 100, y: 300 })
       .build();
   }
@@ -174,11 +160,11 @@ export class CanvasObjectFactory {
    * This is a special type of agent that represents system output to the user
    */
   static createUserOutputAgent(): Agent {
-    return AgentBuilder.create("Deterministic")
-      .withId("user-output")
-      .withName("User Output")
-      .withDescription("Represents system output to the user")
-      .withSubtype("system")
+    return AgentBuilder.create('Deterministic')
+      .withId('user-output')
+      .withName('User Output')
+      .withDescription('Represents system output to the user')
+      .withSubtype('system')
       .withPosition({ x: 600, y: 300 })
       .build();
   }

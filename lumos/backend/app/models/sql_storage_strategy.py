@@ -103,142 +103,130 @@ class SQLProjectStorage(ProjectStorageStrategy):
             
             
     def save_project(self, project_data):
-        print("Saving project data...")
-        print(project_data)
-        conn = self.db.get_connection()
-        cursor = conn.cursor(dictionary=True)
-        
+        """Save a project to the database"""
         try:
-            # First check if project exists
-            cursor.execute("SELECT id FROM projects WHERE name = %s", 
-                        (project_data['project']['name'],))
-            project = cursor.fetchone()
+            conn = self.db.get_connection()
+            cursor = conn.cursor()
             
-            if project:
-                project_id = project['id']
-                # Update existing project
-                cursor.execute("""
-                    UPDATE projects 
-                    SET version = %s, description = %s 
-                    WHERE id = %s
-                """, (project_data['project']['version'],
-                    project_data['project']['description'],
-                    project_id))
+            try:
+                # Start transaction
+                conn.start_transaction()
                 
-                # Delete existing data to replace with new data
-                cursor.execute("DELETE FROM authors WHERE project_id = %s", (project_id,))
-                cursor.execute("DELETE FROM agents WHERE project_id = %s", (project_id,))
-                cursor.execute("DELETE FROM tools WHERE project_id = %s", (project_id,))
-                cursor.execute("DELETE FROM tasks WHERE project_id = %s", (project_id,))
-                cursor.execute("DELETE FROM connections WHERE project_id = %s", (project_id,))
-            else:
-                # Insert new project
-                cursor.execute("""
-                    INSERT INTO projects (name, version, description)
-                    VALUES (%s, %s, %s)
-                """, (project_data['project']['name'],
-                    project_data['project']['version'],
-                    project_data['project']['description']))
+                # Save project
+                project = project_data.get('project', {})
+                project_name = project.get('name', 'Untitled Project')
+                project_version = project.get('version', '1.0')
+                project_description = project.get('description', '')
+                
+                # Insert project
+                cursor.execute(
+                    "INSERT INTO projects (name, version, description) VALUES (%s, %s, %s)",
+                    (project_name, project_version, project_description)
+                )
                 project_id = cursor.lastrowid
-            
-            # Insert authors
-            for author in project_data['project'].get('authors', []):
-                cursor.execute("""
-                    INSERT INTO authors (project_id, name)
-                    VALUES (%s, %s)
-                """, (project_id, author))
-            
-            # Insert agents with positions
-            for agent in project_data.get('agents', []):
-                cursor.execute("""
-                    INSERT INTO agents (project_id, agent_id, name, description, 
-                                    type, subtype, position_x, position_y)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """, (project_id, agent['id'], agent['name'], agent['description'],
-                    agent['type'], agent.get('subtype', ''),
-                    agent['position']['x'], agent['position']['y']))
                 
-                agent_id = cursor.lastrowid
+                # ID mapping for special agents
+                id_mapping = {
+                    'user-input': 0,
+                    'user-output': 1
+                }
                 
-                # Insert agent model if exists
-                if agent.get('model'):
-                    cursor.execute("""
-                        INSERT INTO agent_models (agent_id, llm_type, model_name, 
-                                            model_version, provider, parameters)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                    """, (agent_id, 
-                        agent['model'].get('llmType', ''),
-                        agent['model'].get('name', ''),
-                        agent['model'].get('version', 'latest'),
-                        agent['model'].get('provider', ''),
-                        json.dumps(agent['model'].get('parameters', {}))))
+                # Save agents WITHOUT position data
+                for agent in project_data.get('agents', []):
+                    # Remove position data if it exists
+                    if 'position' in agent:
+                        del agent['position']
+                    
+                    # Get the original agent ID
+                    agent_id = agent.get('id', '')
+                    
+                    cursor.execute(
+                        "INSERT INTO agents (agent_id, project_id, name, description, type, subtype) VALUES (%s, %s, %s, %s, %s, %s)",
+                        (
+                            agent_id,  # Use original string ID
+                            project_id,
+                            agent.get('name', ''),
+                            agent.get('description', ''),
+                            agent.get('type', ''),
+                            agent.get('subtype', '')
+                        )
+                    )
                 
-                # Insert agent capabilities
-                for capability in agent.get('capabilities', []):
-                    cursor.execute("""
-                        INSERT INTO agent_capabilities (agent_id, capability)
-                        VALUES (%s, %s)
-                    """, (agent_id, capability))
-            
-            # Insert tools with positions
-            for tool in project_data.get('tools', []):
-                cursor.execute("""
-                    INSERT INTO tools (project_id, tool_id, name, description,
-                                    type, subtype, position_x, position_y)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """, (project_id, tool['id'], tool['name'], tool['description'],
-                    tool['type'], tool.get('subtype', ''),
-                    tool['position']['x'], tool['position']['y']))
+                # Save tools WITHOUT position data
+                for tool in project_data.get('tools', []):
+                    # Remove position data if it exists
+                    if 'position' in tool:
+                        del tool['position']
+                    
+                    # Similar ID handling for tools if needed
+                    tool_id = tool.get('id', '')
+                    try:
+                        if tool_id.startswith('tool-'):
+                            numeric_id = int(tool_id.split('-')[1])
+                        else:
+                            numeric_id = 20000 + hash(tool_id) % 10000
+                    except:
+                        numeric_id = 20000  # Default if parsing fails
+                    
+                    cursor.execute(
+                        "INSERT INTO tools (id, project_id, name, description, type) VALUES (%s, %s, %s, %s, %s)",
+                        (
+                            numeric_id,
+                            project_id,
+                            tool.get('name', ''),
+                            tool.get('description', ''),
+                            tool.get('type', '')
+                        )
+                    )
                 
-                tool_id = cursor.lastrowid
+                # Save connections with unique IDs
+                used_connection_ids = set()  # Track used IDs to prevent duplicates
+                for connection in project_data.get('connections', []):
+                    conn_id = connection.get('id', '')
+                    
+                    # Generate a numeric ID based on the string ID
+                    base_numeric_id = abs(hash(conn_id)) % 1000000
+                    numeric_conn_id = base_numeric_id
+                    
+                    # If ID collision, keep incrementing until we find an unused ID
+                    counter = 1
+                    while numeric_conn_id in used_connection_ids:
+                        numeric_conn_id = base_numeric_id + counter
+                        counter += 1
+                    
+                    # Add to used IDs set
+                    used_connection_ids.add(numeric_conn_id)
+                    
+                    # Map source and target IDs (keep existing code)
+                    source = connection.get('source', '')
+                    target = connection.get('target', '')
+                    
+                    # Keep the existing source/target ID mapping logic
+                    source_id = source  # Use string IDs directly
+                    target_id = target  # Use string IDs directly
+                    
+                    cursor.execute(
+                        "INSERT INTO connections (id, project_id, source, target, label) VALUES (%s, %s, %s, %s, %s)",
+                        (
+                            numeric_conn_id,
+                            project_id,
+                            source_id,  # Use string IDs
+                            target_id,  # Use string IDs
+                            connection.get('label', '')
+                        )
+                    )
                 
-                # Insert tool parameters
-                if tool.get('parameters'):
-                    for param_name, param_value in tool['parameters'].items():
-                        cursor.execute("""
-                            INSERT INTO tool_parameters (tool_id, param_name, param_type,
-                                                    default_value, required)
-                            VALUES (%s, %s, %s, %s, %s)
-                        """, (tool_id, param_name, typeof(param_value),
-                            str(param_value), True))
-            
-            # Insert tasks with positions
-            for task in project_data.get('tasks', []):
-                cursor.execute("""
-                    INSERT INTO tasks (project_id, task_id, name, description,
-                                    type, position_x, position_y)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, (project_id, task['id'], task['name'], task['description'],
-                    task['type'], task['position']['x'], task['position']['y']))
+                # Commit transaction
+                conn.commit()
+                return {"status": "success", "project_id": project_id}
                 
-                task_id = cursor.lastrowid
+            except Exception as e:
+                conn.rollback()
+                raise e
                 
-                # Insert task parameters
-                if task.get('parameters'):
-                    for param_name, param_value in task['parameters'].items():
-                        cursor.execute("""
-                            INSERT INTO task_parameters (task_id, param_name, param_type,
-                                                    default_value, required)
-                            VALUES (%s, %s, %s, %s, %s)
-                        """, (task_id, param_name, typeof(param_value),
-                            str(param_value), True))
-            
-            # Insert connections
-            for connection in project_data.get('connections', []):
-                cursor.execute("""
-                    INSERT INTO connections (project_id, connection_id, source_type,
-                                        source_id, target_type, target_id, label)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, (project_id, connection['id'], 'agent',  # You'll need to determine source/target types
-                    connection['source'], 'agent', connection['target'],  # Adjust as needed
-                    connection.get('label', '')))
-            
-            print("Project saved successfully")
-            conn.commit()
-            return {"status": "success", "project_id": project_id}
-        
         except Exception as e:
-            conn.rollback()
             return {"status": "error", "message": str(e)}
         finally:
-            cursor.close()
+            if 'conn' in locals() and conn.is_connected():
+                cursor.close()
+                conn.close()

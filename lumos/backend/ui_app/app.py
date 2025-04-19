@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 config = json.loads(os.environ.get("CONFIG", "{}"))
 OPENAI_API_KEY = ""
-## Replace with the API key for the OpenAI AP
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     output = ""

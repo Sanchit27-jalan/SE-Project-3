@@ -9,6 +9,7 @@
 LUMOS is a comprehensive platform that enables users to design, build, and deploy multi-agent AI systems using a low-code approach. The system facilitates the creation of complex agent networks through a visual interface and structured definition language (LDL - LUMOS Definition Language).
 
 Key features:
+
 - Visual canvas-based agent orchestration
 - Structured agent definition using LDL
 - Export/import capabilities for agent systems
@@ -19,12 +20,14 @@ Key features:
 ## System Requirements
 
 ### Backend Requirements
+
 - Python 3.10+
 - Docker & Docker Compose
 - ngrok (for external API access)
 - MySQL (for persistent storage)
 
 ### Frontend Requirements
+
 - Node.js 16+
 - npm/yarn
 
@@ -33,16 +36,19 @@ Key features:
 ### Backend Setup
 
 1. Navigate to the backend directory:
+
 ```bash
 cd lumos/backend
 ```
 
 2. Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 3. Initialize the database:
+
 ```bash
 python -m app.init_db
 ```
@@ -54,11 +60,13 @@ python -m app.init_db
 ### Frontend Setup
 
 1. Navigate to the frontend directory:
+
 ```bash
 cd lumos/frontend
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
@@ -68,18 +76,21 @@ npm install
 Run the following commands in separate terminals:
 
 ### Start the Backend FastAPI Server
+
 ```bash
 cd lumos/backend
 uvicorn app.main:app --reload
 ```
 
 ### Start the Proxy Server (for external API connections)
+
 ```bash
 cd lumos/backend
 python proxy.py
 ```
 
 ### Start the Frontend Development Server
+
 ```bash
 cd lumos/frontend
 npm run dev
@@ -114,6 +125,7 @@ LUMOS consists of three main components:
 ## Code Structure
 
 ### Backend Structure
+
 ```
 lumos/backend/
 ├── app/
@@ -133,6 +145,7 @@ lumos/backend/
 ```
 
 ### Frontend Structure
+
 ```
 lumos/frontend/
 ├── src/
@@ -162,21 +175,25 @@ Refer to `LDLSchema.json` for the complete schema definition and `docs/LDLSyntax
 ## Usage Guide
 
 1. **Create a new project**:
+
    - Define project metadata
    - Select agent components from the palette
    - Connect agents with interactions
 
 2. **Configure agents**:
+
    - Select agent types (AI, Deterministic, Hybrid)
    - Define capabilities and memory configurations
    - Set up model parameters
 
 3. **Define interactions**:
+
    - Create communication paths between agents
    - Configure messaging protocols
    - Set up task dependencies
 
 4. **Export/Import projects**:
+
    - Export designs as LDL-compatible JSON
    - Import existing designs
    - Share projects with other users
@@ -198,11 +215,13 @@ pytest
 ```
 
 Key test files:
+
 - `test_export_and_save_controller.py`: Tests for project export functionality
 - `test_generator_controller.py`: Tests for code generation
 - `test_network_utils.py`: Tests for API communication utilities
 
 To run all tests:
+
 ```bash
 python -m unittest discover -v tests
 ```
@@ -217,6 +236,7 @@ npm run test
 ```
 
 To test coverage by test:
+
 ```bash
 npm run test:coverage
 ```
@@ -226,6 +246,7 @@ npm run test:coverage
 The backend API documentation is available at http://localhost:8000/docs when the backend server is running.
 
 ## Contributors
+
 - Prakhar Singhal
 - Hemang Jain
 - Divyansh Pandey

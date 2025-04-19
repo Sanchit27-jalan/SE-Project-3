@@ -12,24 +12,26 @@ export class Project {
   constructor(
     public id: string,
     public name: string,
-    public version: string = "",
-    public description: string = "",
-    public authors: string[] = [],
+    public version: string = '',
+    public description: string = '',
+    public authors: string[] = []
   ) {}
 }
 
 export class Agent {
+  userPositioned: boolean;
+  manuallyPositioned: boolean;
   constructor(
     public id: string,
     public type: string,
-    public name: string = "",
-    public description: string = "",
-    public subtype: string = "",
+    public name: string = '',
+    public description: string = '',
+    public subtype: string = '',
     public model: Record<string, any> = {},
     public capabilities: string[] = [],
-    public memory: Record<string, any> = { type: "short-term" },
-    public learning: Record<string, any> = { type: "none" },
-    public position: Position = { x: 0, y: 0 },
+    public memory: Record<string, any> = { type: 'short-term' },
+    public learning: Record<string, any> = { type: 'none' },
+    public position: Position = { x: 0, y: 0 }
   ) {}
 }
 
@@ -38,27 +40,27 @@ export class Tool {
     public id: string,
     public description: string,
     public type: string,
-    public name: string = "",
-    public agentId: string = "",
-    public subtype: string = "",
+    public name: string = '',
+    public agentId: string = '',
+    public subtype: string = '',
     public accessibleBy: string[] = [],
     public authentication: Record<string, any> = {},
     public parameters: Record<string, any> = {},
-    public position: Position = { x: 0, y: 0 },
+    public position: Position = { x: 0, y: 0 }
   ) {}
 }
 
 export class Interaction {
   constructor(
     public id: string,
-    public name: string = "",
-    public description: string = "",
-    public type: string = "AgentAgent",
+    public name: string = '',
+    public description: string = '',
+    public type: string = 'AgentAgent',
     public participants: string[] = [],
     public protocol: {
       type: string;
       messageTypes: string[];
-    } = { type: "DirectedMessaging", messageTypes: ["task"] },
+    } = { type: 'DirectedMessaging', messageTypes: ['task'] }
   ) {}
 }
 
@@ -67,14 +69,14 @@ export class ProjectData {
     public project: Project,
     public agents: Agent[] = [],
     public tools: Tool[] = [],
-    public interactions: Interaction[] = [],
+    public interactions: Interaction[] = []
   ) {}
 }
 
 export enum NodeType {
-  AGENT = "agent",
-  USER_INPUT = "user-input",
-  USER_OUTPUT = "user-output",
+  AGENT = 'agent',
+  USER_INPUT = 'user-input',
+  USER_OUTPUT = 'user-output',
 }
 
 export interface NodeData {

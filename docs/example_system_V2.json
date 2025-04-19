@@ -1,0 +1,107 @@
+{
+  "project": {
+    "name": "Documentation Assistant",
+    "version": "0.1.0",
+    "description": "A system to help generate and maintain technical documentation",
+    "authors": ["LUMOS Team"]
+  },
+  "agents": [
+    {
+      "id": "doc-writer",
+      "name": "Documentation Writer",
+      "description": "Creates initial documentation drafts",
+      "type": "AI",
+      "subtype": "LLM",
+      "model": {
+        "name": "GPT-4",
+        "version": "latest",
+        "provider": "OpenAI",
+        "parameters": {
+          "temperature": 0.7,
+          "maxTokens": 2000
+        }
+      },
+      "capabilities": ["contentGeneration", "textSummarization", "formatting"],
+      "tools": [
+        {
+          "name": "DocDraftCreator",
+          "description": "Generates an initial draft of documentation based on input text, code comments, or feature summaries.",
+          "type": "ContentGeneration",
+          "subtype": "Writer",
+          "parameters": {
+            "input_type": "text | code | summary",
+            "audience": "developer | end-user",
+            "output_format": "markdown | html | plaintext"
+          }
+        },
+        {
+          "name": "TechSummaryGenerator",
+          "description": "Creates concise summaries from long-form technical content such as design documents, transcripts, or specifications.",
+          "type": "TextSummarization",
+          "subtype": "Compressor",
+          "parameters": {
+            "content_type": "technical_doc | transcript | notes",
+            "compression_level": "low | medium | high",
+            "output_format": "markdown | bullet_points | json"
+          }
+        },
+        {
+          "name": "DocFormatter",
+          "description": "Formats raw or semi-structured text into polished documentation ready for publishing.",
+          "type": "Formatting",
+          "subtype": "Converter",
+          "parameters": {
+            "input_style": "raw | inconsistent | partially_formatted",
+            "target_format": "markdown | html | latex",
+            "tone": "formal | neutral | conversational"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-checker",
+      "name": "Fact Checker",
+      "description": "Verifies technical accuracy of documentation",
+      "type": "Hybrid",
+      "subtype": "LLM+Rule",
+      "capabilities": ["informationRetrieval", "verification", "crossReferencing"],
+      "tools": [
+        {
+          "name": "ClaimVerifier",
+          "description": "Validates factual claims in technical documentation using both rule-based heuristics and language model reasoning.",
+          "type": "Verification",
+          "subtype": "LLM+Rule",
+          "parameters": {
+            "input_type": "sentence | paragraph",
+            "confidence_threshold": 0.8,
+            "output_format": "json | inline_annotated"
+          }
+        },
+        {
+          "name": "ReferenceMatcher",
+          "description": "Cross-checks cited facts or figures against known databases, standards, or source repositories to ensure consistency.",
+          "type": "CrossReferencing",
+          "subtype": "Retriever",
+          "parameters": {
+            "source": "documentation | dataset | API_reference",
+            "matching_mode": "exact | semantic",
+            "output_format": "json"
+          }
+        }
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "id": "doc-review",
+      "type": "AgentAgent",
+      "subtype": "Cooperation",
+      "participants": ["doc-writer", "fact-checker"],
+      "pattern": "RequestResponse",
+      "protocol": {
+        "type": "DirectMessaging",
+        "messageTypes": ["Command", "Response"]
+      }
+    }
+  ]
+}

@@ -6,7 +6,6 @@ from fastapi import HTTPException
 class GeneratorService:
     def __init__(self):
         self.api_key = ""
-        ## Replace with the API key for the OpenAI API
         self.client = openai.OpenAI(api_key=self.api_key)
     
     def _generate_completion(self, prompt, model="gpt-4o", temperature=0.0):

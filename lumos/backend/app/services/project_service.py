@@ -203,3 +203,28 @@ class ProjectService:
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
+    def get_all_projects(self):
+        """
+        Retrieve all saved projects from the database.
+        """
+        try:
+            # Fetch all projects from the model
+            projects = self.model.get_all_projects()
+            return {"status": "success", "projects": projects}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def get_project_by_id(self, project_id):
+        """
+        Retrieve a specific project by ID including all its data
+        """
+        try:
+            # Fetch project data from the model
+            project = self.model.get_project_by_id(project_id)
+            if not project:
+                return {"status": "error", "message": f"Project with ID {project_id} not found"}
+            
+            return {"status": "success", "project": project}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
