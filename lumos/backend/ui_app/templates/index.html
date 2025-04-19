@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot Style Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 0;
+            margin: 0;
+            background: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        h2 {
+            color: #ecf0f1;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .chat-container {
+            width: 100%;
+            margin: 0;
+            background: #34495e;
+            border-radius: 0;
+            box-shadow: none;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #2c3e50;
+            padding: 10px;
+            background: #3b4a5a;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin-bottom: 15px;
+        }
+        .bot-message {
+            text-align: left;
+        }
+        .message p {
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin: 0;
+        }
+        .bot-message .bubble {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #7f8c8d;
+        }
+        .bubble .details {
+            font-size: 14px;
+            margin-top: 10px;
+            color: #bdc3c7;
+        }
+        .final-output {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 18px;
+            color: #ecf0f1;
+        }
+        form {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            border-top: 1px solid #2c3e50;
+            background: #34495e;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #7f8c8d;
+            border-radius: 20px;
+            background: #2c3e50;
+            color: #ecf0f1;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2>Chatbot Interface</h2>
+        <div class="chat-box">
+            {% for step in output.steps %}
+            <div class="message bot-message">
+                <div class="bubble">
+                    {% if step.input %}
+                        <strong>Input:</strong> {{ step.input }}<br>
+                    {% endif %}
+                    {% if step.output %}
+                        <strong>Output:</strong> {{ step.output }}<br>
+                    {% endif %}
+                    {% if step.tool %}
+                        <strong>Tool:</strong> {{ step.tool }}<br>
+                    {% endif %}
+                    {% if step.task %}
+                        <strong>Task:</strong> {{ step.task }}<br>
+                    {% endif %}
+                    {% if step.content %}
+                        <strong>Content:</strong> {{ step.content }}<br>
+                    {% endif %}
+                    {% if step.from %}
+                        <strong>From:</strong> {{ step.from }}<br>
+                    {% endif %}
+                    {% if step.to %}
+                        <strong>To:</strong> {{ step.to }}<br>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <!-- <div class="final-output">
+            {{ output.steps[-1].content if output.steps else '' }}
+        </div> -->
+        <form method="post">
+            <input type="text" name="user_input" placeholder="Type your message..." value="{{ request.form.get('user_input', '') }}">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+    <!-- {{ output }} -->
+</body>
+</html>

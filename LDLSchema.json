@@ -1,0 +1,404 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "LUMOS Definition Language",
+    "description": "Schema for defining LUMOS AI projects, agents, and their interactions",
+    "type": "object",
+    "required": [
+        "project",
+        "agents",
+        "interactions"
+    ],
+    "properties": {
+        "project": {
+            "description": "Basic information about the LUMOS project",
+            "type": "object",
+            "required": [
+                "name",
+                "version",
+                "description"
+            ],
+            "properties": {
+                "name": {
+                    "description": "Name of the project",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "Version identifier for the project",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Detailed description of the project's purpose",
+                    "type": "string"
+                },
+                "authors": {
+                    "description": "List of project contributors",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "agents": {
+            "description": "Collection of AI and deterministic agents in the system",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "type",
+                    "capabilities"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier for the agent",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Human-readable name of the agent",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Detailed explanation of the agent's purpose and behavior",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "Primary classification of the agent",
+                        "type": "string",
+                        "enum": [
+                            "AI",
+                            "Deterministic",
+                            "Hybrid"
+                        ]
+                    },
+                    "subtype": {
+                        "description": "Secondary classification for more specific agent categorization",
+                        "type": "string"
+                    },
+                    "model": {
+                        "description": "Information about the AI model used by the agent",
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "description": "Name of the AI model",
+                                "type": "string"
+                            },
+                            "version": {
+                                "description": "Version identifier for the AI model",
+                                "type": "string"
+                            },
+                            "provider": {
+                                "description": "Organization or service providing the model",
+                                "type": "string"
+                            },
+                            "parameters": {
+                                "description": "Configuration parameters for the model",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "capabilities": {
+                        "description": "List of functionalities the agent can perform",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "memory": {
+                        "description": "Memory system configuration for the agent",
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "description": "Type of memory system",
+                                "type": "string",
+                                "enum": [
+                                    "Working",
+                                    "Episodic",
+                                    "Semantic",
+                                    "Procedural",
+                                    "Vector",
+                                    "Graph",
+                                    "Relational"
+                                ]
+                            },
+                            "capacity": {
+                                "description": "Size or limit of the memory storage",
+                                "type": [
+                                    "integer",
+                                    "string"
+                                ]
+                            },
+                            "persistence": {
+                                "description": "Whether memory persists between sessions",
+                                "type": "boolean"
+                            },
+                            "storage": {
+                                "description": "Storage medium for the memory",
+                                "type": "string",
+                                "enum": [
+                                    "InMemory",
+                                    "Database",
+                                    "File",
+                                    "Remote"
+                                ]
+                            }
+                        }
+                    },
+                    "learning": {
+                        "description": "Learning capabilities of the agent",
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "description": "Type of learning approach",
+                                "type": "string",
+                                "enum": [
+                                    "Supervised",
+                                    "Unsupervised",
+                                    "Reinforcement",
+                                    "SelfSupervised",
+                                    "Transfer",
+                                    "None"
+                                ]
+                            },
+                            "strategy": {
+                                "description": "Specific learning algorithm or methodology",
+                                "type": "string"
+                            },
+                            "parameters": {
+                                "description": "Configuration parameters for learning",
+                                "type": "object"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "tasks": {
+            "description": "Work items that agents perform within the system",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "type",
+                    "description"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier for the task",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Human-readable name of the task",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Detailed explanation of what the task does",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "Primary classification of the task",
+                        "type": "string",
+                        "enum": [
+                            "InformationProcessing",
+                            "DecisionMaking",
+                            "Interaction",
+                            "DomainSpecific"
+                        ]
+                    },
+                    "subtype": {
+                        "description": "Secondary classification for more specific task categorization",
+                        "type": "string"
+                    },
+                    "assignedTo": {
+                        "description": "Agent IDs responsible for performing the task",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "dependencies": {
+                        "description": "Task IDs that must be completed before this task",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "inputs": {
+                        "description": "Data required for task execution",
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "outputs": {
+                        "description": "Data produced by task execution",
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "constraints": {
+                        "description": "Limitations on task execution",
+                        "type": "object",
+                        "properties": {
+                            "time": {
+                                "description": "Time-related constraints",
+                                "type": "object"
+                            },
+                            "resource": {
+                                "description": "Resource usage constraints",
+                                "type": "object"
+                            },
+                            "quality": {
+                                "description": "Output quality constraints",
+                                "type": "object"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "tools": {
+            "description": "External utilities that agents can use",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "type",
+                    "description"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier for the tool",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Human-readable name of the tool",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Detailed explanation of what the tool does",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "Primary classification of the tool",
+                        "type": "string",
+                        "enum": [
+                            "Information",
+                            "Computational",
+                            "Interaction",
+                            "Development"
+                        ]
+                    },
+                    "subtype": {
+                        "description": "Secondary classification for more specific tool categorization",
+                        "type": "string"
+                    },
+                    "accessibleBy": {
+                        "description": "Agent IDs that have permission to use this tool",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "authentication": {
+                        "description": "Security requirements for accessing the tool",
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "description": "Authentication method",
+                                "type": "string"
+                            },
+                            "credentials": {
+                                "description": "Authentication details",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "parameters": {
+                        "description": "Configuration options for the tool",
+                        "type": "object"
+                    }
+                }
+            }
+        },
+        "interactions": {
+            "description": "Communication protocols between agents and environments (both intra and inter)",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "type",
+                    "participants"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier for the interaction",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Human-readable name of the interaction",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Detailed explanation of the interaction's purpose",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "Primary classification of the interaction",
+                        "type": "string",
+                        "enum": [
+                            "AgentAgent",
+                            "AgentEnvironment",
+                            "EnvironmentEnvironment"
+                        ]
+                    },
+                    "subtype": {
+                        "description": "Secondary classification for more specific interaction categorization",
+                        "type": "string"
+                    },
+                    "participants": {
+                        "description": "Agent IDs involved in the interaction",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "pattern": {
+                        "description": "Interaction pattern or style",
+                        "type": [
+                            null,
+                            null
+                        ]
+                    },
+                    "protocol": {
+                        "description": "Communication protocol used in the interaction",
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "description": "Type of communication protocol",
+                                "type": "string",
+                                "enum": [
+                                    "DirectedMessaging",
+                                    "UndirectedMessaging"
+                                ]
+                            },
+                            "messageTypes": {
+                                "description": "Types of messages exchanged during the interaction",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+

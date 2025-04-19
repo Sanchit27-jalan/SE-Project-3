@@ -1,0 +1,117 @@
+
+{
+    "project": {
+        "name": "Documentation Assistant",
+        "version": "0.1.0",
+        "description": "A system to help generate and maintain technical documentation",
+        "authors": ["LUMOS Team"]
+    },
+    "agents": [
+        {
+            "id": "doc-writer",
+            "name": "Documentation Writer",
+            "description": "Creates initial documentation drafts",
+            "type": "AI",
+            "subtype": "LLM",
+            "model": {
+                "name": "GPT-4",
+                "version": "latest",
+                "provider": "OpenAI",
+                "parameters": {
+                    "temperature": 0.7,
+                    "maxTokens": 2000
+                }
+            },
+            "capabilities": [
+                "contentGeneration", 
+                "textSummarization", 
+                "formatting"
+            ],
+            "memory": {
+                "type": "Vector",
+                "capacity": "1GB",
+                "persistence": true,
+                "storage": "Database"
+            }
+        },
+        {
+            "id": "fact-checker",
+            "name": "Fact Checker",
+            "description": "Verifies technical accuracy of documentation",
+            "type": "Hybrid",
+            "subtype": "LLM+Rule",
+            "capabilities": [
+                "informationRetrieval",
+                "verification",
+                "crossReferencing"
+            ]
+        }
+    ],
+    "tasks": [
+        {
+            "id": "create-api-docs",
+            "name": "Create API Documentation",
+            "description": "Generate complete documentation for REST API endpoints",
+            "type": "InformationProcessing",
+            "subtype": "ContentGeneration",
+            "assignedTo": ["doc-writer"],
+            "inputs": [
+                {
+                    "name": "apiSpecification",
+                    "type": "file",
+                    "format": "OpenAPI"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "apiDocumentation",
+                    "type": "file",
+                    "format": "Markdown"
+                }
+            ]
+        }
+    ],
+    "tools": [
+        {
+            "id": "code-analyzer",
+            "name": "Code Analyzer",
+            "description": "Extracts information from source code",
+            "type": "Information",
+            "subtype": "Parser",
+            "accessibleBy": ["doc-writer", "fact-checker"]
+        }
+    ],
+    "environments": [
+        {
+            "id": "dev-env",
+            "name": "Development Environment",
+            "description": "Environment for system development and testing",
+            "type": "Virtual",
+            "properties": {
+                "deterministic": true,
+                "dynamic": false,
+                "multiAgent": true,
+                "fullyObservable": true
+            },
+            "context": "Cloud",
+            "technicalSpecs": {
+                "operatingSystem": "Linux",
+                "platform": "Web",
+                "runtime": "Docker"
+            }
+        }
+    ],
+    "interactions": [
+        {
+            "id": "doc-review",
+            "type": "AgentAgent",
+            "subtype": "Cooperation",
+            "participants": ["doc-writer", "fact-checker"],
+            "pattern": "RequestResponse",
+            "protocol": {
+                "type": "DirectMessaging",
+                "messageTypes": ["Command", "Response"]
+            }
+        }
+    ]
+}

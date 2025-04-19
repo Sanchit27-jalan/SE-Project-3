@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server Metrics Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 50%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Server Metrics Dashboard</h1>
+    <table>
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td>Average Latency (s)</td><td id="avg-latency">{{ metrics.average_latency }}</td></tr>
+        <tr><td>CPU Usage (%)</td><td id="cpu-usage">{{ metrics.cpu_percent }}</td></tr>
+        <tr><td>Memory Usage (%)</td><td id="mem-usage">{{ metrics.memory_percent }}</td></tr>
+        <tr><td>Uptime (s)</td><td id="uptime">{{ metrics.uptime }}</td></tr>
+    </table>
+    <h2>Recent Latencies (s)</h2>
+    <ul id="latencies">
+        {% for l in metrics.latencies %}
+        <li>{{ l }}</li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        async function fetchMetrics() {
+            try {
+                const res = await fetch('/metrics/data');
+                const data = await res.json();
+                document.getElementById('avg-latency').textContent = data.average_latency.toFixed(4);
+                document.getElementById('cpu-usage').textContent = data.cpu_percent;
+                document.getElementById('mem-usage').textContent = data.memory_percent;
+                document.getElementById('uptime').textContent = data.uptime.toFixed(0);
+                const list = document.getElementById('latencies');
+                list.innerHTML = '';
+                data.latencies.forEach(l => {
+                    const li = document.createElement('li');
+                    li.textContent = l.toFixed(4);
+                    list.appendChild(li);
+                });
+            } catch (err) {
+                console.error('Failed to fetch metrics', err);
+            }
+        }
+        setInterval(fetchMetrics, 5000);
+    </script>
+</body>
+</html>
